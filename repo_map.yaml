@@ -1,0 +1,182 @@
+# repo_map.yaml - AI用コードベース地図
+# 最終更新: 2026-03-14
+
+project:
+  name: action-tag-expense-tracker
+  description: 行動タグベースの家計簿Webアプリ。行動（例：通勤、外食）にタグを付け、そのタグに紐づく支出を記録・集計する。
+  architecture: モノレポ（Backend Go + Frontend React/TypeScript）
+  database: MySQL 8.0
+  container: Docker Compose（db + backend）
+
+# ──────────────────────────────────────
+# ドメインモデル
+# ──────────────────────────────────────
+domain:
+  entities:
+    ActionTag:
+      description: 行動タグ（例：通勤、外食、買い物）
+      fields: [id, name]
+      file: backend/models/models.go
+
+    Event:
+      description: ある日付に行った行動の記録。ActionTagと1対1で紐づく
+      fields: [id, date, action_tag_id]
+      relations:
+        - belongs_to: ActionTag (action_tag_id)
+        - has_many: Expense (event_id)
+      file: backend/models/models.go
+
+    Expense:
+      description: 支出明細。Eventに紐づく個々の支出行
+      fields: [id, event_id, item, amount]
+      notes: item は空文字可（金額のみの登録が可能）
+      file: backend/models/models.go
+
+  flow: "ActionTag → Event（日付+タグ） → Expense（項目+金額）"
+
+# ──────────────────────────────────────
+# Backend
+# ──────────────────────────────────────
+backend:
+  language: Go 1.22
+  framework: chi (router) + GORM (ORM)
+  entry_point: backend/cmd/server/main.go
+  port: 8080
+
+  layers:
+    handlers:
+      description: HTTPハンドラ層。リクエスト解析・バリデーション・レスポンス生成
+      files:
+        - backend/handlers/action_tag.go   # ActionTagHandler: List, Create, Update, Delete + writeJSON
+        - backend/handlers/event.go        # EventHandler: Create
+        - backend/handlers/expense.go      # ExpenseHandler: Create
+        - backend/handlers/summary.go      # SummaryHandler: MonthTotal, TagMonthTotals + parseYearMonth
+        - backend/handlers/helpers.go      # parseDate
+
+    repositories:
+      description: DBアクセス層。GORMによるCRUD操作
+      files:
+        - backend/repositories/action_tag.go  # FindAll, Create, Update, Delete, FindByID
+        - backend/repositories/event.go       # Create
+        - backend/repositories/expense.go     # Create
+        - backend/repositories/summary.go     # MonthTotal, TagMonthTotals (生SQL) + TagSummary型
+
+    models:
+      description: GORMモデル定義
+      files:
+        - backend/models/models.go  # ActionTag, Event, Expense
+
+  api_routes:
+    - method: GET     path: /tags              handler: ActionTagHandler.List
+    - method: POST    path: /tags              handler: ActionTagHandler.Create
+    - method: PUT     path: /tags/{id}         handler: ActionTagHandler.Update
+    - method: DELETE  path: /tags/{id}         handler: ActionTagHandler.Delete
+    - method: POST    path: /events            handler: EventHandler.Create
+    - method: POST    path: /expenses          handler: ExpenseHandler.Create
+    - method: GET     path: /summary/month     handler: SummaryHandler.MonthTotal     query: [year, month]
+    - method: GET     path: /summary/tag       handler: SummaryHandler.TagMonthTotals query: [year, month]
+
+  notes:
+    - services層はまだ存在しない（handler → repository の直接呼び出し）
+    - migrations/ はまだ存在しない（GORM AutoMigrate を使用）
+    - tests/ はまだ存在しない
+
+# ──────────────────────────────────────
+# Frontend
+# ──────────────────────────────────────
+frontend:
+  language: TypeScript
+  framework: React 19 + Vite 8
+  entry_point: frontend/src/main.tsx
+  dev_port: 5173
+
+  routing:
+    type: useState による手動ページ切り替え（ルーターライブラリ未使用）
+    file: frontend/src/App.tsx
+    pages: [home, tag-select, expense-input, tag-manage]
+
+  pages:
+    Home:
+      file: frontend/src/pages/Home.tsx
+      description: トップページ。月別支出合計・タグ別集計を表示。月ナビゲーション付き
+      api_calls: [getMonthTotal, getTagTotals]
+      navigates_to: [tag-select, tag-manage]
+
+    TagSelect:
+      file: frontend/src/pages/TagSelect.tsx
+      description: 支出入力前にタグを選択する画面
+      api_calls: [getTags]
+      navigates_to: [expense-input]
+
+    ExpenseInput:
+      file: frontend/src/pages/ExpenseInput.tsx
+      description: 支出入力画面。日付・タグ（選択済み）と複数の支出行（項目+金額）を入力して保存
+      api_calls: [createEvent, createExpense]
+      notes: 保存時にまずEventを作成し、各行のExpenseを順次作成する
+
+    TagManage:
+      file: frontend/src/pages/TagManage.tsx
+      description: タグのCRUD管理画面
+      api_calls: [getTags, createTag, updateTag, deleteTag]
+
+  api_client:
+    file: frontend/src/api/client.ts
+    description: fetch ベースのAPIクライアント。型定義（ActionTag, Event, Expense, TagSummary）も含む
+    base_url: http://localhost:8080
+
+  styles:
+    file: frontend/src/index.css
+
+  notes:
+    - hooks/ はまだ存在しない
+    - components/ はまだ存在しない（全UIがpages内に直書き）
+    - utils/ はまだ存在しない
+    - テスト（Vitest）はまだ存在しない
+
+# ──────────────────────────────────────
+# インフラ
+# ──────────────────────────────────────
+infrastructure:
+  docker_compose:
+    file: docker-compose.yml
+    services:
+      db:
+        image: mysql:8.0
+        port: 3306
+        database: expense_tracker
+      backend:
+        build: ./backend
+        port: 8080
+        depends_on: db (healthy)
+
+  dockerfile:
+    file: backend/Dockerfile
+    base: golang:1.22-alpine
+
+  makefile:
+    file: Makefile
+    targets:
+      dev: Docker Compose起動 + Frontend devサーバー
+      dev-frontend: Frontend devサーバーのみ
+      stop: Docker Compose停止
+      lint: Backend go vet
+      lint-frontend: Frontend ESLint
+      test: Backend go test
+      test-frontend: Frontend Vitest
+      typecheck: Frontend tsc --noEmit
+      e2e: Playwright テスト
+      check: lint + lint-frontend + typecheck + test
+
+# ──────────────────────────────────────
+# 未実装・不足部分
+# ──────────────────────────────────────
+gaps:
+  - "services層: handler→repoの直接呼び出しになっている"
+  - "マイグレーション: AutoMigrateのみ。golang-migrate未導入"
+  - "Backendテスト: 存在しない"
+  - "Frontendテスト: Vitest未導入"
+  - "E2Eテスト: Playwright設定なし"
+  - "OpenAPI仕様: api/openapi.yaml が存在しない"
+  - "共通コンポーネント: components/ が空"
+  - "カスタムhooks: hooks/ が空"
+  - "エラーハンドリング: Frontend側のエラー表示が alert のみ"
