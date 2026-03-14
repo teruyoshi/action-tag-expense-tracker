@@ -10,7 +10,7 @@ interface Props {
 export function TagSummaryCard({ tagTotals, onTagDetail, year, month }: Props) {
   return (
     <div className="card">
-      <h2>行動タグ別</h2>
+      <h2>支出理由別</h2>
       {tagTotals.length === 0 ? (
         <p className="empty">データなし</p>
       ) : (

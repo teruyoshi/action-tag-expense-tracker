@@ -18,7 +18,7 @@ export function TagSelect() {
   return (
     <div>
       <button className="btn-back" onClick={() => navigate("/")}>&larr; 戻る</button>
-      <h1>行動タグを選択</h1>
+      <h1>支出理由を選択</h1>
       {tags.length === 0 ? (
         <p className="empty">タグがありません。タグ管理から作成してください。</p>
       ) : (

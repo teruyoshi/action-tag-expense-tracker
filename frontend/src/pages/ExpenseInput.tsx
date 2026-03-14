@@ -64,7 +64,7 @@ export function ExpenseInput() {
           <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
         </label>
         <label>
-          行動タグ
+          支出理由
           <input type="text" value={tag.name} disabled />
         </label>
       </div>
