@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS expenses;
+DROP TABLE IF EXISTS events;
+DROP TABLE IF EXISTS action_tags;

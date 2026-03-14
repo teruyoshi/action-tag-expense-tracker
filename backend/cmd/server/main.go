@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"action-tag-expense-tracker/backend/handlers"
-	"action-tag-expense-tracker/backend/models"
 	"action-tag-expense-tracker/backend/repositories"
 
 	"github.com/go-chi/chi/v5"
@@ -34,8 +33,6 @@ func main() {
 	if err != nil {
 		log.Fatal("failed to connect to database:", err)
 	}
-
-	db.AutoMigrate(&models.ActionTag{}, &models.Event{}, &models.Expense{})
 
 	tagRepo := &repositories.ActionTagRepository{DB: db}
 	eventRepo := &repositories.EventRepository{DB: db}
