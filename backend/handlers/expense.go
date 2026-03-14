@@ -9,7 +9,8 @@ import (
 )
 
 type ExpenseHandler struct {
-	Repo repositories.ExpenseRepo
+	Repo        repositories.ExpenseRepo
+	BalanceRepo repositories.BalanceRepo
 }
 
 func (h *ExpenseHandler) Create(w http.ResponseWriter, r *http.Request) {
@@ -25,6 +26,12 @@ func (h *ExpenseHandler) Create(w http.ResponseWriter, r *http.Request) {
 	if err := h.Repo.Create(&expense); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
+	}
+	if h.BalanceRepo != nil {
+		if err := h.BalanceRepo.Subtract(expense.Amount); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	}
 	w.WriteHeader(http.StatusCreated)
 	writeJSON(w, expense)

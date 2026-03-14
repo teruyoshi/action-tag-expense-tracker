@@ -21,3 +21,9 @@ type Expense struct {
 	Item    string `json:"item"`
 	Amount  int    `json:"amount" gorm:"not null"`
 }
+
+type Balance struct {
+	ID        uint      `json:"id" gorm:"primaryKey"`
+	Amount    int       `json:"amount" gorm:"not null;default:0"`
+	UpdatedAt time.Time `json:"updated_at"`
+}

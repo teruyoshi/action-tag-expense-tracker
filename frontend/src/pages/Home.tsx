@@ -12,11 +12,18 @@ export function Home({ onNavigate }: Props) {
   const [month, setMonth] = useState(now.getMonth() + 1);
   const [total, setTotal] = useState(0);
   const [tagTotals, setTagTotals] = useState<TagSummary[]>([]);
+  const [balance, setBalance] = useState(0);
+  const [showBalanceModal, setShowBalanceModal] = useState(false);
+  const [balanceInput, setBalanceInput] = useState("");
 
   useEffect(() => {
     api.getMonthTotal(year, month).then((r) => setTotal(r.total));
     api.getTagTotals(year, month).then(setTagTotals);
   }, [year, month]);
+
+  useEffect(() => {
+    api.getBalance().then((b) => setBalance(b.amount));
+  }, []);
 
   const changeMonth = (delta: number) => {
     let m = month + delta;
@@ -27,9 +34,30 @@ export function Home({ onNavigate }: Props) {
     setMonth(m);
   };
 
+  const handleBalanceSubmit = () => {
+    const amount = parseInt(balanceInput, 10);
+    if (isNaN(amount)) return;
+    api.updateBalance(amount).then((b) => {
+      setBalance(b.amount);
+      setShowBalanceModal(false);
+      setBalanceInput("");
+    });
+  };
+
   return (
     <div>
       <h1>家計簿</h1>
+
+      <div className="card">
+        <h2>所持金</h2>
+        <p className="total">&yen;{balance.toLocaleString()}</p>
+        <button className="btn-secondary" onClick={() => {
+          setBalanceInput(String(balance));
+          setShowBalanceModal(true);
+        }}>
+          設定
+        </button>
+      </div>
 
       <div className="month-nav">
         <button onClick={() => changeMonth(-1)}>&lt;</button>
@@ -66,6 +94,29 @@ export function Home({ onNavigate }: Props) {
           タグ管理
         </button>
       </div>
+
+      {showBalanceModal && (
+        <div className="modal-overlay" onClick={() => setShowBalanceModal(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <h2>所持金を設定</h2>
+            <input
+              type="number"
+              value={balanceInput}
+              onChange={(e) => setBalanceInput(e.target.value)}
+              placeholder="金額を入力"
+              autoFocus
+            />
+            <div className="modal-actions">
+              <button className="btn-primary" onClick={handleBalanceSubmit}>
+                保存
+              </button>
+              <button className="btn-secondary" onClick={() => setShowBalanceModal(false)}>
+                キャンセル
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -22,3 +22,9 @@ type SummaryRepo interface {
 	MonthTotal(year, month int) (int, error)
 	TagMonthTotals(year, month int) ([]TagSummary, error)
 }
+
+type BalanceRepo interface {
+	Get() (*models.Balance, error)
+	Update(amount int) (*models.Balance, error)
+	Subtract(amount int) error
+}

@@ -38,11 +38,13 @@ func main() {
 	eventRepo := &repositories.EventRepository{DB: db}
 	expenseRepo := &repositories.ExpenseRepository{DB: db}
 	summaryRepo := &repositories.SummaryRepository{DB: db}
+	balanceRepo := &repositories.BalanceRepository{DB: db}
 
 	tagHandler := &handlers.ActionTagHandler{Repo: tagRepo}
 	eventHandler := &handlers.EventHandler{Repo: eventRepo}
-	expenseHandler := &handlers.ExpenseHandler{Repo: expenseRepo}
+	expenseHandler := &handlers.ExpenseHandler{Repo: expenseRepo, BalanceRepo: balanceRepo}
 	summaryHandler := &handlers.SummaryHandler{Repo: summaryRepo}
+	balanceHandler := &handlers.BalanceHandler{Repo: balanceRepo}
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
@@ -66,6 +68,9 @@ func main() {
 
 	r.Get("/summary/month", summaryHandler.MonthTotal)
 	r.Get("/summary/tag", summaryHandler.TagMonthTotals)
+
+	r.Get("/balance", balanceHandler.Get)
+	r.Put("/balance", balanceHandler.Update)
 
 	port := getEnv("PORT", "8080")
 	fmt.Printf("Server running on :%s\n", port)

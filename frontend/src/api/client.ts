@@ -36,6 +36,12 @@ export interface TagSummary {
   total: number;
 }
 
+export interface Balance {
+  id: number;
+  amount: number;
+  updated_at: string;
+}
+
 export const api = {
   getTags: () => request<ActionTag[]>("/tags"),
   createTag: (name: string) => request<ActionTag>("/tags", { method: "POST", body: JSON.stringify({ name }) }),
@@ -53,4 +59,8 @@ export const api = {
 
   getTagTotals: (year: number, month: number) =>
     request<TagSummary[]>(`/summary/tag?year=${year}&month=${month}`),
+
+  getBalance: () => request<Balance>("/balance"),
+  updateBalance: (amount: number) =>
+    request<Balance>("/balance", { method: "PUT", body: JSON.stringify({ amount }) }),
 };
