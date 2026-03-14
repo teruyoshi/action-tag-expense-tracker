@@ -1,7 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { MemoryRouter } from "react-router-dom";
 import { TagManage } from "./TagManage";
+
+const mockNavigate = vi.fn();
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual("react-router-dom");
+  return { ...actual, useNavigate: () => mockNavigate };
+});
 
 vi.mock("../api/client", () => ({
   api: {
@@ -27,8 +34,7 @@ beforeEach(() => {
 });
 
 describe("TagManage", () => {
-  const onBack = vi.fn();
-  const renderTagManage = () => render(<TagManage onBack={onBack} />);
+  const renderTagManage = () => render(<MemoryRouter><TagManage /></MemoryRouter>);
 
   it("タグ一覧を表示する", async () => {
     renderTagManage();
@@ -115,10 +121,10 @@ describe("TagManage", () => {
     expect(mockApi.deleteTag).not.toHaveBeenCalled();
   });
 
-  it("戻るボタンでonBackが呼ばれる", async () => {
+  it("戻るボタンで/に遷移する", async () => {
     renderTagManage();
     const user = userEvent.setup();
     await user.click(screen.getByText("← 戻る"));
-    expect(onBack).toHaveBeenCalled();
+    expect(mockNavigate).toHaveBeenCalledWith("/");
   });
 });

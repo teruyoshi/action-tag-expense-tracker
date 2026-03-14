@@ -1,7 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { MemoryRouter } from "react-router-dom";
 import { TagDetails } from "./TagDetails";
+
+const mockNavigate = vi.fn();
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual("react-router-dom");
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+    useParams: () => ({ tagId: "1" }),
+    useSearchParams: () => [new URLSearchParams("year=2026&month=3&name=通勤")],
+  };
+});
 
 vi.mock("../api/client", () => ({
   api: {
@@ -21,14 +33,7 @@ beforeEach(() => {
 });
 
 describe("TagDetails", () => {
-  const defaultProps = {
-    tagId: 1,
-    tagName: "通勤",
-    year: 2026,
-    month: 3,
-    onBack: vi.fn(),
-  };
-  const renderTagDetails = (props = defaultProps) => render(<TagDetails {...props} />);
+  const renderTagDetails = () => render(<MemoryRouter><TagDetails /></MemoryRouter>);
 
   it("タグ名と年月を表示する", () => {
     renderTagDetails();
@@ -61,11 +66,11 @@ describe("TagDetails", () => {
     });
   });
 
-  it("戻るボタンでonBackが呼ばれる", async () => {
+  it("戻るボタンで/に遷移する", async () => {
     renderTagDetails();
     const user = userEvent.setup();
     await user.click(screen.getByText("← 戻る"));
-    expect(defaultProps.onBack).toHaveBeenCalled();
+    expect(mockNavigate).toHaveBeenCalledWith("/");
   });
 
   it("正しいパラメータでAPIを呼ぶ", () => {

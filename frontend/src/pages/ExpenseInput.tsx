@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { api } from "../api/client";
 import type { ActionTag } from "../api/client";
 
@@ -7,17 +8,20 @@ interface ExpenseRow {
   amount: string;
 }
 
-interface Props {
-  tag: ActionTag;
-  onBack: () => void;
-  onSaved: () => void;
-}
+export function ExpenseInput() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const tag = (location.state as { tag: ActionTag } | null)?.tag;
 
-export function ExpenseInput({ tag, onBack, onSaved }: Props) {
   const today = new Date().toISOString().split("T")[0];
   const [date, setDate] = useState(today);
   const [rows, setRows] = useState<ExpenseRow[]>([{ item: "", amount: "" }]);
   const [saving, setSaving] = useState(false);
+
+  if (!tag) {
+    navigate("/tags/select", { replace: true });
+    return null;
+  }
 
   const updateRow = (index: number, field: keyof ExpenseRow, value: string) => {
     const next = [...rows];
@@ -41,7 +45,7 @@ export function ExpenseInput({ tag, onBack, onSaved }: Props) {
       for (const row of validRows) {
         await api.createExpense(event.id, row.item, Number(row.amount));
       }
-      onSaved();
+      navigate("/");
     } catch (e) {
       alert("保存に失敗しました: " + (e as Error).message);
     } finally {
@@ -51,7 +55,7 @@ export function ExpenseInput({ tag, onBack, onSaved }: Props) {
 
   return (
     <div>
-      <button className="btn-back" onClick={onBack}>&larr; 戻る</button>
+      <button className="btn-back" onClick={() => navigate("/tags/select")}>&larr; 戻る</button>
       <h1>支出入力</h1>
 
       <div className="card">

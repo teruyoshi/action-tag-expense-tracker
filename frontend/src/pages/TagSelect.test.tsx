@@ -1,7 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { MemoryRouter } from "react-router-dom";
 import { TagSelect } from "./TagSelect";
+
+const mockNavigate = vi.fn();
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual("react-router-dom");
+  return { ...actual, useNavigate: () => mockNavigate };
+});
 
 vi.mock("../api/client", () => ({
   api: {
@@ -21,9 +28,7 @@ beforeEach(() => {
 });
 
 describe("TagSelect", () => {
-  const onSelect = vi.fn();
-  const onBack = vi.fn();
-  const renderTagSelect = () => render(<TagSelect onSelect={onSelect} onBack={onBack} />);
+  const renderTagSelect = () => render(<MemoryRouter><TagSelect /></MemoryRouter>);
 
   it("タグ一覧を表示する", async () => {
     renderTagSelect();
@@ -41,19 +46,21 @@ describe("TagSelect", () => {
     });
   });
 
-  it("タグをクリックするとonSelectが呼ばれる", async () => {
+  it("タグをクリックすると/expense/newに遷移する", async () => {
     renderTagSelect();
     const user = userEvent.setup();
     await waitFor(() => screen.getByText("通勤"));
 
     await user.click(screen.getByText("通勤"));
-    expect(onSelect).toHaveBeenCalledWith({ id: 1, name: "通勤" });
+    expect(mockNavigate).toHaveBeenCalledWith("/expense/new", {
+      state: { tag: { id: 1, name: "通勤" } },
+    });
   });
 
-  it("戻るボタンでonBackが呼ばれる", async () => {
+  it("戻るボタンで/に遷移する", async () => {
     renderTagSelect();
     const user = userEvent.setup();
     await user.click(screen.getByText("← 戻る"));
-    expect(onBack).toHaveBeenCalled();
+    expect(mockNavigate).toHaveBeenCalledWith("/");
   });
 });

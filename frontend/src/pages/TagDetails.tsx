@@ -1,27 +1,29 @@
 import { useEffect, useState } from "react";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { api } from "../api/client";
 import type { TagExpenseDetail } from "../api/client";
 
-interface Props {
-  tagId: number;
-  tagName: string;
-  year: number;
-  month: number;
-  onBack: () => void;
-}
+export function TagDetails() {
+  const navigate = useNavigate();
+  const { tagId } = useParams<{ tagId: string }>();
+  const [searchParams] = useSearchParams();
+  const tagName = searchParams.get("name") ?? "";
+  const year = Number(searchParams.get("year"));
+  const month = Number(searchParams.get("month"));
 
-export function TagDetails({ tagId, tagName, year, month, onBack }: Props) {
   const [details, setDetails] = useState<TagExpenseDetail[]>([]);
 
   useEffect(() => {
-    api.getTagExpenseDetails(year, month, tagId).then(setDetails);
+    if (tagId && year && month) {
+      api.getTagExpenseDetails(year, month, Number(tagId)).then(setDetails);
+    }
   }, [year, month, tagId]);
 
   const total = details.reduce((sum, d) => sum + d.amount, 0);
 
   return (
     <div>
-      <button className="btn-back" onClick={onBack}>&larr; 戻る</button>
+      <button className="btn-back" onClick={() => navigate("/")}>&larr; 戻る</button>
       <h1>{tagName}</h1>
       <p className="detail-subtitle">{year}年{month}月</p>
 

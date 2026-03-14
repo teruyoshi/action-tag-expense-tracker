@@ -1,7 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { MemoryRouter } from "react-router-dom";
 import { ExpenseInput } from "./ExpenseInput";
+
+const mockNavigate = vi.fn();
+const mockLocation = { state: { tag: { id: 1, name: "通勤" } } };
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual("react-router-dom");
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+    useLocation: () => mockLocation,
+  };
+});
 
 vi.mock("../api/client", () => ({
   api: {
@@ -20,10 +32,7 @@ beforeEach(() => {
 });
 
 describe("ExpenseInput", () => {
-  const tag = { id: 1, name: "通勤" };
-  const onBack = vi.fn();
-  const onSaved = vi.fn();
-  const renderExpenseInput = () => render(<ExpenseInput tag={tag} onBack={onBack} onSaved={onSaved} />);
+  const renderExpenseInput = () => render(<MemoryRouter><ExpenseInput /></MemoryRouter>);
 
   it("タグ名と日付が表示される", () => {
     renderExpenseInput();
@@ -53,36 +62,33 @@ describe("ExpenseInput", () => {
       1
     );
     expect(mockApi.createExpense).toHaveBeenCalledWith(1, "電車賃", 500);
-    expect(onSaved).toHaveBeenCalled();
+    expect(mockNavigate).toHaveBeenCalledWith("/");
   });
 
   it("金額が0以下の行は送信されない", async () => {
     renderExpenseInput();
     const user = userEvent.setup();
 
-    // 金額を入力しない状態で保存
     await user.click(screen.getByText("保存"));
     expect(mockApi.createEvent).not.toHaveBeenCalled();
   });
 
-  it("戻るボタンでonBackが呼ばれる", async () => {
+  it("戻るボタンで/tags/selectに遷移する", async () => {
     renderExpenseInput();
     const user = userEvent.setup();
     await user.click(screen.getByText("← 戻る"));
-    expect(onBack).toHaveBeenCalled();
+    expect(mockNavigate).toHaveBeenCalledWith("/tags/select");
   });
 
   it("複数行の支出を保存できる", async () => {
     renderExpenseInput();
     const user = userEvent.setup();
 
-    // 1行目を入力
     const itemInputs = screen.getAllByPlaceholderText("項目名");
     const amountInputs = screen.getAllByPlaceholderText("金額");
     await user.type(itemInputs[0], "電車賃");
     await user.type(amountInputs[0], "500");
 
-    // 2行目を追加して入力
     await user.click(screen.getByText("+ 項目追加"));
     const newAmountInputs = screen.getAllByPlaceholderText("金額");
     await user.type(screen.getAllByPlaceholderText("項目名")[1], "バス代");

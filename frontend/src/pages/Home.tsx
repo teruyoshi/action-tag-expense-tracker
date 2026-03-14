@@ -1,16 +1,13 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { api } from "../api/client";
 import type { TagSummary } from "../api/client";
 import { MonthNav } from "../components/MonthNav";
 import { BalanceCard } from "../components/BalanceCard";
 import { TagSummaryCard } from "../components/TagSummaryCard";
 
-interface Props {
-  onNavigate: (page: string) => void;
-  onTagDetail: (params: { tagId: number; tagName: string; year: number; month: number }) => void;
-}
-
-export function Home({ onNavigate, onTagDetail }: Props) {
+export function Home() {
+  const navigate = useNavigate();
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth() + 1);
@@ -36,6 +33,10 @@ export function Home({ onNavigate, onTagDetail }: Props) {
     setMonth(m);
   };
 
+  const handleTagDetail = (params: { tagId: number; tagName: string; year: number; month: number }) => {
+    navigate(`/tags/${params.tagId}/details?year=${params.year}&month=${params.month}&name=${encodeURIComponent(params.tagName)}`);
+  };
+
   return (
     <div>
       <h1>家計簿</h1>
@@ -49,13 +50,13 @@ export function Home({ onNavigate, onTagDetail }: Props) {
         <p className="total">&yen;{total.toLocaleString()}</p>
       </div>
 
-      <TagSummaryCard tagTotals={tagTotals} onTagDetail={onTagDetail} year={year} month={month} />
+      <TagSummaryCard tagTotals={tagTotals} onTagDetail={handleTagDetail} year={year} month={month} />
 
       <div className="actions">
-        <button className="btn-primary" onClick={() => onNavigate("tag-select")}>
+        <button className="btn-primary" onClick={() => navigate("/tags/select")}>
           支出入力
         </button>
-        <button className="btn-secondary" onClick={() => onNavigate("tag-manage")}>
+        <button className="btn-secondary" onClick={() => navigate("/tags/manage")}>
           タグ管理
         </button>
       </div>

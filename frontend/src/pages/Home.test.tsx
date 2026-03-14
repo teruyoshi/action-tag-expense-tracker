@@ -1,7 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { MemoryRouter } from "react-router-dom";
 import { Home } from "./Home";
+
+const mockNavigate = vi.fn();
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual("react-router-dom");
+  return { ...actual, useNavigate: () => mockNavigate };
+});
 
 vi.mock("../api/client", () => ({
   api: {
@@ -26,9 +33,7 @@ beforeEach(() => {
 });
 
 describe("Home", () => {
-  const onNavigate = vi.fn();
-  const onTagDetail = vi.fn();
-  const renderHome = () => render(<Home onNavigate={onNavigate} onTagDetail={onTagDetail} />);
+  const renderHome = () => render(<MemoryRouter><Home /></MemoryRouter>);
 
   it("月支出合計を表示する", async () => {
     renderHome();
@@ -81,34 +86,30 @@ describe("Home", () => {
     expect(screen.getByText(`${expectedYear}年${expectedMonth}月`)).toBeInTheDocument();
   });
 
-  it("支出入力ボタンでtag-selectに遷移する", async () => {
+  it("支出入力ボタンで/tags/selectに遷移する", async () => {
     renderHome();
     const user = userEvent.setup();
     await user.click(screen.getByText("支出入力"));
-    expect(onNavigate).toHaveBeenCalledWith("tag-select");
+    expect(mockNavigate).toHaveBeenCalledWith("/tags/select");
   });
 
-  it("タグ管理ボタンでtag-manageに遷移する", async () => {
+  it("タグ管理ボタンで/tags/manageに遷移する", async () => {
     renderHome();
     const user = userEvent.setup();
     await user.click(screen.getByText("タグ管理"));
-    expect(onNavigate).toHaveBeenCalledWith("tag-manage");
+    expect(mockNavigate).toHaveBeenCalledWith("/tags/manage");
   });
 
-  it("タグクリックでonTagDetailが呼ばれる", async () => {
+  it("タグクリックでタグ詳細に遷移する", async () => {
     renderHome();
     const user = userEvent.setup();
     await waitFor(() => screen.getByText("通勤"));
 
     await user.click(screen.getByText("通勤"));
 
-    const now = new Date();
-    expect(onTagDetail).toHaveBeenCalledWith({
-      tagId: 1,
-      tagName: "通勤",
-      year: now.getFullYear(),
-      month: now.getMonth() + 1,
-    });
+    expect(mockNavigate).toHaveBeenCalledWith(
+      expect.stringContaining("/tags/1/details")
+    );
   });
 
   it("所持金モーダルで金額を更新できる", async () => {

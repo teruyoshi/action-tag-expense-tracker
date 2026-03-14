@@ -1,12 +1,10 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { api } from "../api/client";
 import type { ActionTag } from "../api/client";
 
-interface Props {
-  onBack: () => void;
-}
-
-export function TagManage({ onBack }: Props) {
+export function TagManage() {
+  const navigate = useNavigate();
   const [tags, setTags] = useState<ActionTag[]>([]);
   const [newName, setNewName] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -38,7 +36,7 @@ export function TagManage({ onBack }: Props) {
 
   return (
     <div>
-      <button className="btn-back" onClick={onBack}>&larr; 戻る</button>
+      <button className="btn-back" onClick={() => navigate("/")}>&larr; 戻る</button>
       <h1>タグ管理</h1>
 
       <div className="card">

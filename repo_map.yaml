@@ -103,9 +103,14 @@ frontend:
   dev_port: 5173
 
   routing:
-    type: useState による手動ページ切り替え（ルーターライブラリ未使用）
+    type: react-router-dom v7（BrowserRouter + Routes/Route）
     file: frontend/src/App.tsx
-    pages: [home, tag-select, expense-input, tag-manage, tag-details]
+    routes:
+      - path: /                      page: Home
+      - path: /tags/select           page: TagSelect
+      - path: /expense/new           page: ExpenseInput (state: tag)
+      - path: /tags/manage           page: TagManage
+      - path: /tags/:tagId/details   page: TagDetails (query: year, month, name)
 
   pages:
     Home:
