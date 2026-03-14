@@ -18,6 +18,6 @@ type Event struct {
 type Expense struct {
 	ID      uint   `json:"id" gorm:"primaryKey"`
 	EventID uint   `json:"event_id" gorm:"not null"`
-	Item    string `json:"item" gorm:"not null"`
+	Item    string `json:"item"`
 	Amount  int    `json:"amount" gorm:"not null"`
 }

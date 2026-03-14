@@ -32,7 +32,7 @@ export function ExpenseInput({ tag, onBack, onSaved }: Props) {
   };
 
   const handleSave = async () => {
-    const validRows = rows.filter((r) => r.item && Number(r.amount) > 0);
+    const validRows = rows.filter((r) => Number(r.amount) > 0);
     if (validRows.length === 0) return;
 
     setSaving(true);

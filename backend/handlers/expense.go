@@ -18,8 +18,8 @@ func (h *ExpenseHandler) Create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	if expense.Item == "" || expense.Amount <= 0 || expense.EventID == 0 {
-		http.Error(w, "event_id, item and positive amount are required", http.StatusBadRequest)
+	if expense.Amount <= 0 || expense.EventID == 0 {
+		http.Error(w, "event_id and positive amount are required", http.StatusBadRequest)
 		return
 	}
 	if err := h.Repo.Create(&expense); err != nil {

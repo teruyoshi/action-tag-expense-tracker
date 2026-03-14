@@ -46,7 +46,7 @@ export const api = {
     request<Event>("/events", { method: "POST", body: JSON.stringify({ date, action_tag_id }) }),
 
   createExpense: (event_id: number, item: string, amount: number) =>
-    request<Expense>("/expenses", { method: "POST", body: JSON.stringify({ event_id, item, amount }) }),
+    request<Expense>("/expenses", { method: "POST", body: JSON.stringify({ event_id, item: item || undefined, amount }) }),
 
   getMonthTotal: (year: number, month: number) =>
     request<{ total: number }>(`/summary/month?year=${year}&month=${month}`),
