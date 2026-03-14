@@ -88,16 +88,20 @@ feature-to-slices      ← Feature を Slice に分解
 
 #### Step 4: 実装
 
-ユーザーの承認後：
-1. `safe-code-generator` でコードを生成
-2. `test-generator` でテストを生成
+ユーザーの承認後、`safe-code-generator` でコードを生成する。
+このステップではプロダクションコードのみを生成する。テストは次のステップで生成する。
 
-#### Step 5: 検証
+#### Step 5: テスト生成
+
+`test-generator` を実行し、Step 4 で生成したコードに対するテストを生成する。
+テスト生成は **省略しない**。実装後に必ず実行すること。
+
+#### Step 6: 検証
 
 `change-verifier` を実行し、全チェックを通す。
 問題があれば修正し、再検証する。
 
-#### Step 6: レビュー
+#### Step 7: レビュー
 
 検証が通ったら、ユーザーにレビューを依頼する。
 
@@ -105,11 +109,11 @@ feature-to-slices      ← Feature を Slice に分解
 → 実装が完了しました。レビューをお願いします。
 ```
 
-#### Step 7: リファクタ（任意）
+#### Step 8: リファクタ（任意）
 
 レビュー後、希望があれば `refactor-suggester` を実行。
 
-#### Step 8: マージ → 次のSlice
+#### Step 9: マージ → 次のSlice
 
 レビューOKであれば、次のSliceへ進む。
 
