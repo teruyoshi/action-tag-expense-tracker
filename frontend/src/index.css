@@ -260,3 +260,40 @@ label {
   gap: 8px;
   margin-top: 12px;
 }
+
+.tag-list-clickable {
+  cursor: pointer;
+  transition: background 0.15s;
+  border-radius: 4px;
+  padding: 8px 4px;
+}
+
+.tag-list-clickable:hover {
+  background: #e3f2fd;
+}
+
+.detail-subtitle {
+  color: #666;
+  margin-bottom: 12px;
+}
+
+.detail-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.detail-table th,
+.detail-table td {
+  padding: 8px 4px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.detail-table th {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.amount-col {
+  text-align: right;
+}

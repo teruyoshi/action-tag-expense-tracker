@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 
 	"action-tag-expense-tracker/backend/repositories"
 )
@@ -31,6 +32,25 @@ func (h *SummaryHandler) TagMonthTotals(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	results, err := h.Repo.TagMonthTotals(year, month)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	writeJSON(w, results)
+}
+
+func (h *SummaryHandler) TagExpenseDetails(w http.ResponseWriter, r *http.Request) {
+	year, month, err := parseYearMonth(r)
+	if err != nil {
+		http.Error(w, "year and month query params required", http.StatusBadRequest)
+		return
+	}
+	tagID, err := strconv.Atoi(r.URL.Query().Get("tag_id"))
+	if err != nil {
+		http.Error(w, "tag_id query param required", http.StatusBadRequest)
+		return
+	}
+	results, err := h.Repo.TagExpenseDetails(year, month, tagID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

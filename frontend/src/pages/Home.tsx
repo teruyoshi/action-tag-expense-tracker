@@ -4,9 +4,10 @@ import type { TagSummary } from "../api/client";
 
 interface Props {
   onNavigate: (page: string) => void;
+  onTagDetail: (params: { tagId: number; tagName: string; year: number; month: number }) => void;
 }
 
-export function Home({ onNavigate }: Props) {
+export function Home({ onNavigate, onTagDetail }: Props) {
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth() + 1);
@@ -77,7 +78,7 @@ export function Home({ onNavigate }: Props) {
         ) : (
           <ul className="tag-list">
             {tagTotals.map((t) => (
-              <li key={t.tag}>
+              <li key={t.tag} className="tag-list-clickable" onClick={() => onTagDetail({ tagId: t.tag_id, tagName: t.tag, year, month })}>
                 <span>{t.tag}</span>
                 <span>&yen;{t.total.toLocaleString()}</span>
               </li>

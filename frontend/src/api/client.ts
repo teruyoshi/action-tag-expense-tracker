@@ -32,8 +32,15 @@ export interface Expense {
 }
 
 export interface TagSummary {
+  tag_id: number;
   tag: string;
   total: number;
+}
+
+export interface TagExpenseDetail {
+  date: string;
+  item: string;
+  amount: number;
 }
 
 export interface Balance {
@@ -59,6 +66,9 @@ export const api = {
 
   getTagTotals: (year: number, month: number) =>
     request<TagSummary[]>(`/summary/tag?year=${year}&month=${month}`),
+
+  getTagExpenseDetails: (year: number, month: number, tagId: number) =>
+    request<TagExpenseDetail[]>(`/summary/tag/details?year=${year}&month=${month}&tag_id=${tagId}`),
 
   getBalance: () => request<Balance>("/balance"),
   updateBalance: (amount: number) =>
