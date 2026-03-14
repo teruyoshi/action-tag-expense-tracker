@@ -9,7 +9,7 @@ import (
 )
 
 type EventHandler struct {
-	Repo *repositories.EventRepository
+	Repo repositories.EventRepo
 }
 
 type CreateEventRequest struct {

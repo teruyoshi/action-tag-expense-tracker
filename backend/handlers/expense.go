@@ -9,7 +9,7 @@ import (
 )
 
 type ExpenseHandler struct {
-	Repo *repositories.ExpenseRepository
+	Repo repositories.ExpenseRepo
 }
 
 func (h *ExpenseHandler) Create(w http.ResponseWriter, r *http.Request) {

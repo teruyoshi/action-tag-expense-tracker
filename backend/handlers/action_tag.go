@@ -12,7 +12,7 @@ import (
 )
 
 type ActionTagHandler struct {
-	Repo *repositories.ActionTagRepository
+	Repo repositories.ActionTagRepo
 }
 
 func (h *ActionTagHandler) List(w http.ResponseWriter, r *http.Request) {
@@ -83,9 +83,4 @@ func (h *ActionTagHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
-}
-
-func writeJSON(w http.ResponseWriter, data any) {
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(data)
 }

@@ -2,13 +2,12 @@ package handlers
 
 import (
 	"net/http"
-	"strconv"
 
 	"action-tag-expense-tracker/backend/repositories"
 )
 
 type SummaryHandler struct {
-	Repo *repositories.SummaryRepository
+	Repo repositories.SummaryRepo
 }
 
 func (h *SummaryHandler) MonthTotal(w http.ResponseWriter, r *http.Request) {
@@ -39,14 +38,3 @@ func (h *SummaryHandler) TagMonthTotals(w http.ResponseWriter, r *http.Request) 
 	writeJSON(w, results)
 }
 
-func parseYearMonth(r *http.Request) (int, int, error) {
-	year, err := strconv.Atoi(r.URL.Query().Get("year"))
-	if err != nil {
-		return 0, 0, err
-	}
-	month, err := strconv.Atoi(r.URL.Query().Get("month"))
-	if err != nil {
-		return 0, 0, err
-	}
-	return year, month, nil
-}
