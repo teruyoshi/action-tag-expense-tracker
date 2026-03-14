@@ -32,6 +32,11 @@ domain:
       notes: item は空文字可（金額のみの登録が可能）
       file: backend/models/models.go
 
+    Balance:
+      description: 所持金。アプリ全体で1レコードのみ
+      fields: [id, amount, updated_at]
+      file: backend/models/models.go
+
   flow: "ActionTag → Event（日付+タグ） → Expense（項目+金額）"
 
 # ──────────────────────────────────────
@@ -50,21 +55,25 @@ backend:
         - backend/handlers/action_tag.go   # ActionTagHandler: List, Create, Update, Delete + writeJSON
         - backend/handlers/event.go        # EventHandler: Create
         - backend/handlers/expense.go      # ExpenseHandler: Create
-        - backend/handlers/summary.go      # SummaryHandler: MonthTotal, TagMonthTotals + parseYearMonth
-        - backend/handlers/helpers.go      # parseDate
+        - backend/handlers/summary.go      # SummaryHandler: MonthTotal, TagMonthTotals, TagExpenseDetails + parseYearMonth
+        - backend/handlers/balance.go      # BalanceHandler: Get, Update
+        - backend/handlers/helpers.go      # parseDate, writeJSON
+        - backend/handlers/helpers_test.go # TestWriteJSON, TestParseDate, TestParseYearMonth
 
     repositories:
       description: DBアクセス層。GORMによるCRUD操作
       files:
+        - backend/repositories/interfaces.go  # ActionTagRepo, EventRepo, ExpenseRepo, SummaryRepo, BalanceRepo インターフェース定義
         - backend/repositories/action_tag.go  # FindAll, Create, Update, Delete, FindByID
         - backend/repositories/event.go       # Create
         - backend/repositories/expense.go     # Create
-        - backend/repositories/summary.go     # MonthTotal, TagMonthTotals (生SQL) + TagSummary型
+        - backend/repositories/summary.go     # MonthTotal, TagMonthTotals, TagExpenseDetails (生SQL) + TagSummary, TagExpenseDetail型
+        - backend/repositories/balance.go     # Get, Update, Subtract
 
     models:
       description: GORMモデル定義
       files:
-        - backend/models/models.go  # ActionTag, Event, Expense
+        - backend/models/models.go  # ActionTag, Event, Expense, Balance
 
   api_routes:
     - method: GET     path: /tags              handler: ActionTagHandler.List
@@ -75,11 +84,14 @@ backend:
     - method: POST    path: /expenses          handler: ExpenseHandler.Create
     - method: GET     path: /summary/month     handler: SummaryHandler.MonthTotal     query: [year, month]
     - method: GET     path: /summary/tag       handler: SummaryHandler.TagMonthTotals query: [year, month]
+    - method: GET     path: /summary/tag/details handler: SummaryHandler.TagExpenseDetails query: [year, month, tag_id]
+    - method: GET     path: /balance           handler: BalanceHandler.Get
+    - method: PUT     path: /balance           handler: BalanceHandler.Update
 
   notes:
     - services層はまだ存在しない（handler → repository の直接呼び出し）
-    - migrations/ はまだ存在しない（GORM AutoMigrate を使用）
-    - tests/ はまだ存在しない
+    - repositoryインターフェースが定義済み（interfaces.go）
+    - Backend単体テストあり（handlers/helpers_test.go）
 
 # ──────────────────────────────────────
 # Frontend
@@ -93,14 +105,14 @@ frontend:
   routing:
     type: useState による手動ページ切り替え（ルーターライブラリ未使用）
     file: frontend/src/App.tsx
-    pages: [home, tag-select, expense-input, tag-manage]
+    pages: [home, tag-select, expense-input, tag-manage, tag-details]
 
   pages:
     Home:
       file: frontend/src/pages/Home.tsx
-      description: トップページ。月別支出合計・タグ別集計を表示。月ナビゲーション付き
-      api_calls: [getMonthTotal, getTagTotals]
-      navigates_to: [tag-select, tag-manage]
+      description: トップページ。月別支出合計・タグ別集計・所持金を表示。月ナビゲーション付き
+      api_calls: [getMonthTotal, getTagTotals, getBalance, updateBalance]
+      navigates_to: [tag-select, tag-manage, tag-details]
 
     TagSelect:
       file: frontend/src/pages/TagSelect.tsx
@@ -119,19 +131,35 @@ frontend:
       description: タグのCRUD管理画面
       api_calls: [getTags, createTag, updateTag, deleteTag]
 
+    TagDetails:
+      file: frontend/src/pages/TagDetails.tsx
+      description: タグ別の支出明細画面。指定月のタグに紐づく支出一覧と合計を表示
+      api_calls: [getTagExpenseDetails]
+
   api_client:
     file: frontend/src/api/client.ts
-    description: fetch ベースのAPIクライアント。型定義（ActionTag, Event, Expense, TagSummary）も含む
+    description: fetch ベースのAPIクライアント。型定義（ActionTag, Event, Expense, TagSummary, TagExpenseDetail, Balance）も含む
     base_url: http://localhost:8080
 
   styles:
     file: frontend/src/index.css
 
+  testing:
+    framework: Vitest + @testing-library/react
+    setup: frontend/src/test/setup.ts
+    config: frontend/vitest.config.ts
+    test_files:
+      - frontend/src/api/client.test.ts       # APIクライアントの単体テスト
+      - frontend/src/pages/Home.test.tsx       # Homeページのコンポーネントテスト
+      - frontend/src/pages/TagSelect.test.tsx  # TagSelectページのコンポーネントテスト
+      - frontend/src/pages/ExpenseInput.test.tsx # ExpenseInputページのコンポーネントテスト
+      - frontend/src/pages/TagManage.test.tsx  # TagManageページのコンポーネントテスト
+      - frontend/src/pages/TagDetails.test.tsx # TagDetailsページのコンポーネントテスト
+
   notes:
     - hooks/ はまだ存在しない
     - components/ はまだ存在しない（全UIがpages内に直書き）
     - utils/ はまだ存在しない
-    - テスト（Vitest）はまだ存在しない
 
 # ──────────────────────────────────────
 # インフラ
@@ -172,9 +200,7 @@ infrastructure:
 # ──────────────────────────────────────
 gaps:
   - "services層: handler→repoの直接呼び出しになっている"
-  - "マイグレーション: AutoMigrateのみ。golang-migrate未導入"
-  - "Backendテスト: 存在しない"
-  - "Frontendテスト: Vitest未導入"
+  - "Backendテスト: helpers_test.go のみ。handler/repository の統合テストなし"
   - "E2Eテスト: Playwright設定なし"
   - "OpenAPI仕様: api/openapi.yaml が存在しない"
   - "共通コンポーネント: components/ が空"
