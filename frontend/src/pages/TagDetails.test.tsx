@@ -46,8 +46,8 @@ describe("TagDetails", () => {
   it("明細を日付ヘッダーでグループ化して表示する", async () => {
     renderTagDetails();
     await waitFor(() => {
-      expect(screen.getByText("2026-03-01")).toBeInTheDocument();
-      expect(screen.getByText("2026-03-05")).toBeInTheDocument();
+      expect(screen.getByText("▼ 2026-03-01")).toBeInTheDocument();
+      expect(screen.getByText("▼ 2026-03-05")).toBeInTheDocument();
       expect(screen.getByText("電車賃")).toBeInTheDocument();
       expect(screen.getByText("¥500")).toBeInTheDocument();
       expect(screen.getByText("定期代")).toBeInTheDocument();
@@ -60,10 +60,10 @@ describe("TagDetails", () => {
   it("同じ日付の明細が同じグループにまとまる", async () => {
     renderTagDetails();
     await waitFor(() => {
-      const dateHeaders = screen.getAllByText(/^2026-03-/);
+      const dateHeaders = screen.getAllByText(/^▼ 2026-03-/);
       expect(dateHeaders).toHaveLength(2);
-      expect(dateHeaders[0].textContent).toBe("2026-03-01");
-      expect(dateHeaders[1].textContent).toBe("2026-03-05");
+      expect(dateHeaders[0].textContent).toBe("▼ 2026-03-01");
+      expect(dateHeaders[1].textContent).toBe("▼ 2026-03-05");
     });
   });
 
@@ -92,6 +92,32 @@ describe("TagDetails", () => {
   it("正しいパラメータでAPIを呼ぶ", () => {
     renderTagDetails();
     expect(mockApi.getTagExpenseDetails).toHaveBeenCalledWith(2026, 3, 1);
+  });
+
+  it("日付ヘッダーをクリックすると明細行が非表示になる", async () => {
+    renderTagDetails();
+    const user = userEvent.setup();
+    await waitFor(() => {
+      expect(screen.getByText("電車賃")).toBeInTheDocument();
+    });
+    await user.click(screen.getByText("▼ 2026-03-01"));
+    expect(screen.queryByText("電車賃")).not.toBeInTheDocument();
+    expect(screen.queryByText("定期代")).not.toBeInTheDocument();
+    // 別の日付グループは影響を受けない
+    expect(screen.getByText("—")).toBeInTheDocument();
+  });
+
+  it("閉じた日付ヘッダーを再度クリックすると明細行が再表示される", async () => {
+    renderTagDetails();
+    const user = userEvent.setup();
+    await waitFor(() => {
+      expect(screen.getByText("電車賃")).toBeInTheDocument();
+    });
+    await user.click(screen.getByText("▼ 2026-03-01"));
+    expect(screen.queryByText("電車賃")).not.toBeInTheDocument();
+    await user.click(screen.getByText("▶ 2026-03-01"));
+    expect(screen.getByText("電車賃")).toBeInTheDocument();
+    expect(screen.getByText("定期代")).toBeInTheDocument();
   });
 
   it("行をクリックすると編集モードになる", async () => {

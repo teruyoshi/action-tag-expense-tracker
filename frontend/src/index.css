@@ -305,6 +305,8 @@ label {
   color: #666;
   padding: 6px 4px;
   border-bottom: 1px solid #ddd;
+  cursor: pointer;
+  user-select: none;
 }
 
 .editable-row {

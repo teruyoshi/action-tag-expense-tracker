@@ -15,6 +15,7 @@ export function TagDetails() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editItem, setEditItem] = useState("");
   const [editAmount, setEditAmount] = useState("");
+  const [collapsedDates, setCollapsedDates] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (tagId && year && month) {
@@ -32,6 +33,18 @@ export function TagDetails() {
     {}
   );
   const sortedDates = Object.keys(groupedByDate).sort();
+
+  const toggleDate = (date: string) => {
+    setCollapsedDates((prev) => {
+      const next = new Set(prev);
+      if (next.has(date)) {
+        next.delete(date);
+      } else {
+        next.add(date);
+      }
+      return next;
+    });
+  };
 
   const startEdit = (d: TagExpenseDetail) => {
     setEditingId(d.id);
@@ -90,10 +103,10 @@ export function TagDetails() {
             <tbody>
               {sortedDates.map((date) => (
                 <React.Fragment key={date}>
-                  <tr className="date-header">
-                    <td colSpan={3}>{date}</td>
+                  <tr className="date-header" onClick={() => toggleDate(date)}>
+                    <td colSpan={3}>{collapsedDates.has(date) ? "▶" : "▼"} {date}</td>
                   </tr>
-                  {groupedByDate[date].map((d) =>
+                  {!collapsedDates.has(date) && groupedByDate[date].map((d) =>
                     editingId === d.id ? (
                       <tr key={d.id}>
                         <td>
