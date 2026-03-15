@@ -12,7 +12,7 @@ Backend は Go、Frontend は React + TypeScript。
 | Backend | Go / chi / GORM |
 | Frontend | React / TypeScript / Vite |
 | DB | MySQL |
-| テスト | go test / Vitest / Playwright（いずれも未導入） |
+| テスト | go test / Vitest / Playwright |
 | Lint | go vet / ESLint |
 | 環境 | Docker / Docker Compose |
 | タスクランナー | Make |
@@ -27,10 +27,13 @@ repo/
 │   ├── handlers/             # HTTPハンドラ
 │   ├── repositories/         # DBアクセス
 │   ├── models/               # DBモデル
+│   ├── migrations/           # DBマイグレーション
 │   └── Dockerfile
 ├── frontend/src/
 │   ├── pages/                # ページコンポーネント
+│   ├── components/           # 共通コンポーネント
 │   └── api/                  # APIクライアント
+├── e2e/                      # E2Eテスト（Playwright）
 ├── scripts/                  # Make から呼ばれるスクリプト
 ├── skills/                   # AI開発スキル
 ├── repo_map.yaml             # AI用コードベース地図

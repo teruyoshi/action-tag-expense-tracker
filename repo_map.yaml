@@ -1,5 +1,5 @@
 # repo_map.yaml - AI用コードベース地図
-# 最終更新: 2026-03-14
+# 最終更新: 2026-03-15
 
 project:
   name: action-tag-expense-tracker
@@ -43,7 +43,7 @@ domain:
 # Backend
 # ──────────────────────────────────────
 backend:
-  language: Go 1.22
+  language: Go 1.23
   framework: chi (router) + GORM (ORM)
   entry_point: backend/cmd/server/main.go
   port: 8080
@@ -127,8 +127,8 @@ frontend:
 
     TagSelect:
       file: frontend/src/pages/TagSelect.tsx
-      description: 支出入力前にタグを選択する画面
-      api_calls: [getTags]
+      description: 支出入力前にタグを選択する画面。新規タグの作成も可能
+      api_calls: [getTags, createTag]
       navigates_to: [expense-input]
 
     ExpenseInput:
@@ -180,6 +180,16 @@ frontend:
   notes:
     - hooks/ はまだ存在しない
     - utils/ はまだ存在しない
+
+# ──────────────────────────────────────
+# E2Eテスト
+# ──────────────────────────────────────
+e2e:
+  framework: Playwright
+  config: e2e/playwright.config.ts
+  base_url: http://localhost:5173
+  test_files:
+    - e2e/tests/home.spec.ts  # トップページの表示・画面遷移テスト
 
 # ──────────────────────────────────────
 # インフラ
