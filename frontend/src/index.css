@@ -309,6 +309,11 @@ label {
   user-select: none;
 }
 
+.date-subtotal {
+  float: right;
+  color: #e53935;
+}
+
 .editable-row {
   cursor: pointer;
   transition: background 0.15s;

@@ -104,7 +104,12 @@ export function TagDetails() {
               {sortedDates.map((date) => (
                 <React.Fragment key={date}>
                   <tr className="date-header" onClick={() => toggleDate(date)}>
-                    <td colSpan={3}>{collapsedDates.has(date) ? "▶" : "▼"} {date}</td>
+                    <td colSpan={3}>
+                      {collapsedDates.has(date) ? "▶" : "▼"} {date}
+                      <span className="date-subtotal">
+                        &yen;{groupedByDate[date].reduce((sum, d) => sum + d.amount, 0).toLocaleString()}
+                      </span>
+                    </td>
                   </tr>
                   {!collapsedDates.has(date) && groupedByDate[date].map((d) =>
                     editingId === d.id ? (

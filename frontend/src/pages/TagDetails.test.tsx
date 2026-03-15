@@ -46,14 +46,14 @@ describe("TagDetails", () => {
   it("明細を日付ヘッダーでグループ化して表示する", async () => {
     renderTagDetails();
     await waitFor(() => {
-      expect(screen.getByText("▼ 2026-03-01")).toBeInTheDocument();
-      expect(screen.getByText("▼ 2026-03-05")).toBeInTheDocument();
+      expect(screen.getByText(/▼ 2026-03-01/)).toBeInTheDocument();
+      expect(screen.getByText(/▼ 2026-03-05/)).toBeInTheDocument();
       expect(screen.getByText("電車賃")).toBeInTheDocument();
       expect(screen.getByText("¥500")).toBeInTheDocument();
       expect(screen.getByText("定期代")).toBeInTheDocument();
       expect(screen.getByText("¥200")).toBeInTheDocument();
       expect(screen.getByText("—")).toBeInTheDocument();
-      expect(screen.getByText("¥300")).toBeInTheDocument();
+      expect(screen.getAllByText("¥300").length).toBeGreaterThanOrEqual(1);
     });
   });
 
@@ -62,8 +62,20 @@ describe("TagDetails", () => {
     await waitFor(() => {
       const dateHeaders = screen.getAllByText(/^▼ 2026-03-/);
       expect(dateHeaders).toHaveLength(2);
-      expect(dateHeaders[0].textContent).toBe("▼ 2026-03-01");
-      expect(dateHeaders[1].textContent).toBe("▼ 2026-03-05");
+      expect(dateHeaders[0].textContent).toContain("▼ 2026-03-01");
+      expect(dateHeaders[1].textContent).toContain("▼ 2026-03-05");
+    });
+  });
+
+  it("日付ヘッダーに日別合計を表示する", async () => {
+    renderTagDetails();
+    await waitFor(() => {
+      // 2026-03-01: 500 + 200 = 700
+      const header01 = screen.getByText(/▼ 2026-03-01/);
+      expect(header01.textContent).toContain("¥700");
+      // 2026-03-05: 300
+      const header05 = screen.getByText(/▼ 2026-03-05/);
+      expect(header05.textContent).toContain("¥300");
     });
   });
 
@@ -100,7 +112,7 @@ describe("TagDetails", () => {
     await waitFor(() => {
       expect(screen.getByText("電車賃")).toBeInTheDocument();
     });
-    await user.click(screen.getByText("▼ 2026-03-01"));
+    await user.click(screen.getByText(/▼ 2026-03-01/));
     expect(screen.queryByText("電車賃")).not.toBeInTheDocument();
     expect(screen.queryByText("定期代")).not.toBeInTheDocument();
     // 別の日付グループは影響を受けない
@@ -113,9 +125,9 @@ describe("TagDetails", () => {
     await waitFor(() => {
       expect(screen.getByText("電車賃")).toBeInTheDocument();
     });
-    await user.click(screen.getByText("▼ 2026-03-01"));
+    await user.click(screen.getByText(/▼ 2026-03-01/));
     expect(screen.queryByText("電車賃")).not.toBeInTheDocument();
-    await user.click(screen.getByText("▶ 2026-03-01"));
+    await user.click(screen.getByText(/▶ 2026-03-01/));
     expect(screen.getByText("電車賃")).toBeInTheDocument();
     expect(screen.getByText("定期代")).toBeInTheDocument();
   });
