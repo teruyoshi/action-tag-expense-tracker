@@ -15,5 +15,5 @@ func (r *ExpenseRepository) Create(expense *models.Expense) error {
 }
 
 func (r *ExpenseRepository) Update(expense *models.Expense) error {
-	return r.DB.Save(expense).Error
+	return r.DB.Model(expense).Select("item", "amount").Updates(expense).Error
 }

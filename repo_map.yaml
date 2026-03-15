@@ -75,6 +75,12 @@ backend:
         - backend/repositories/expense.go     # Create, Update
         - backend/repositories/summary.go     # MonthTotal, TagMonthTotals, TagExpenseDetails (生SQL) + TagSummary, TagExpenseDetail型
         - backend/repositories/balance.go     # Get, Update, Subtract
+        - backend/repositories/testhelper_test.go  # go-sqlmock によるテスト用DB初期化ヘルパー
+        - backend/repositories/action_tag_test.go  # ActionTagRepository の単体テスト
+        - backend/repositories/event_test.go       # EventRepository の単体テスト
+        - backend/repositories/expense_test.go     # ExpenseRepository の単体テスト
+        - backend/repositories/summary_test.go     # SummaryRepository の単体テスト
+        - backend/repositories/balance_test.go     # BalanceRepository の単体テスト
 
     models:
       description: GORMモデル定義
@@ -98,7 +104,7 @@ backend:
   notes:
     - services層はまだ存在しない（handler → repository の直接呼び出し）
     - repositoryインターフェースが定義済み（interfaces.go）
-    - Backend単体テストあり（全handler + helpers）。モックリポジトリによるテスト
+    - Backend単体テストあり（全handler + helpers + 全repository）。handler層はモックリポジトリ、repository層はgo-sqlmockによるテスト
 
 # ──────────────────────────────────────
 # Frontend
@@ -152,6 +158,13 @@ frontend:
     file: frontend/src/api/client.ts
     description: fetch ベースのAPIクライアント。型定義（ActionTag, Event, Expense, TagSummary, TagExpenseDetail, Balance）も含む
     base_url: http://localhost:8080
+
+  assets:
+    description: 静的アセット（画像・SVG）
+    directory: frontend/src/assets/
+    files:
+      - frontend/src/assets/vite.svg
+      - frontend/src/assets/hero.png
 
   styles:
     file: frontend/src/index.css
@@ -238,7 +251,7 @@ infrastructure:
 # ──────────────────────────────────────
 gaps:
   - "services層: handler→repoの直接呼び出しになっている"
-  - "Backendテスト: handler層は全テスト済み。repository層のテストなし"
+  - "Backendテスト: handler層・repository層ともに全テスト済み"
   - "E2Eテスト: Playwright設定済み。Home画面のみ。他画面のテストなし"
   - "OpenAPI仕様: api/openapi.yaml が存在しない"
   - "カスタムhooks: hooks/ が空"
