@@ -44,7 +44,12 @@ func main() {
 	eventHandler := &handlers.EventHandler{Repo: eventRepo}
 	expenseHandler := &handlers.ExpenseHandler{Repo: expenseRepo, BalanceRepo: balanceRepo}
 	summaryHandler := &handlers.SummaryHandler{Repo: summaryRepo}
-	balanceHandler := &handlers.BalanceHandler{Repo: balanceRepo}
+	balanceHandler := &handlers.BalanceHandler{
+		Repo:          balanceRepo,
+		ActionTagRepo: tagRepo,
+		EventRepo:     eventRepo,
+		ExpenseRepo:   expenseRepo,
+	}
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)

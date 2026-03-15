@@ -45,6 +45,19 @@ func (m *mockActionTagRepo) FindByID(id uint) (*models.ActionTag, error) {
 	}
 	return nil, errors.New("not found")
 }
+func (m *mockActionTagRepo) FindOrCreateByName(name string) (*models.ActionTag, error) {
+	if m.err != nil {
+		return nil, m.err
+	}
+	for i := range m.tags {
+		if m.tags[i].Name == name {
+			return &m.tags[i], nil
+		}
+	}
+	tag := models.ActionTag{ID: 1, Name: name}
+	m.created = &tag
+	return &tag, nil
+}
 
 // --- EventRepo mock ---
 

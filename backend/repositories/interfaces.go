@@ -8,6 +8,7 @@ type ActionTagRepo interface {
 	Update(tag *models.ActionTag) error
 	Delete(id uint) error
 	FindByID(id uint) (*models.ActionTag, error)
+	FindOrCreateByName(name string) (*models.ActionTag, error)
 }
 
 type EventRepo interface {

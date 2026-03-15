@@ -131,4 +131,30 @@ describe("Home", () => {
       expect(screen.getByText("¥50,000")).toBeInTheDocument();
     });
   });
+
+  it("所持金更新後にサマリーを再取得する", async () => {
+    mockApi.updateBalance.mockResolvedValue({ id: 1, amount: 80000, updated_at: "" });
+    mockApi.getMonthTotal
+      .mockResolvedValueOnce({ total: 15000 })
+      .mockResolvedValueOnce({ total: 35000 });
+    mockApi.getTagTotals
+      .mockResolvedValueOnce([{ tag_id: 1, tag: "通勤", total: 5000 }, { tag_id: 2, tag: "外食", total: 10000 }])
+      .mockResolvedValueOnce([{ tag_id: 1, tag: "通勤", total: 5000 }, { tag_id: 2, tag: "外食", total: 10000 }, { tag_id: 3, tag: "その他", total: 20000 }]);
+    renderHome();
+    const user = userEvent.setup();
+    await waitFor(() => screen.getByText("¥100,000"));
+
+    await user.click(screen.getByText("設定"));
+    const input = screen.getByPlaceholderText("金額を入力");
+    await user.clear(input);
+    await user.type(input, "80000");
+    await user.click(screen.getByText("保存"));
+
+    await waitFor(() => {
+      expect(screen.getByText("¥35,000")).toBeInTheDocument();
+    });
+    await waitFor(() => {
+      expect(screen.getByText("その他")).toBeInTheDocument();
+    });
+  });
 });

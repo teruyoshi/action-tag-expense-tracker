@@ -33,3 +33,16 @@ func (r *ActionTagRepository) FindByID(id uint) (*models.ActionTag, error) {
 	err := r.DB.First(&tag, id).Error
 	return &tag, err
 }
+
+func (r *ActionTagRepository) FindOrCreateByName(name string) (*models.ActionTag, error) {
+	var tag models.ActionTag
+	err := r.DB.Where("name = ?", name).First(&tag).Error
+	if err == gorm.ErrRecordNotFound {
+		tag = models.ActionTag{Name: name}
+		if createErr := r.DB.Create(&tag).Error; createErr != nil {
+			return nil, createErr
+		}
+		return &tag, nil
+	}
+	return &tag, err
+}

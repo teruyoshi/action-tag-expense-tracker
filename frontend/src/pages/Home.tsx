@@ -41,7 +41,11 @@ export function Home() {
     <div>
       <h1>家計簿</h1>
 
-      <BalanceCard balance={balance} onBalanceUpdate={setBalance} />
+      <BalanceCard balance={balance} onBalanceUpdate={(amount) => {
+        setBalance(amount);
+        api.getMonthTotal(year, month).then((r) => setTotal(r.total));
+        api.getTagTotals(year, month).then(setTagTotals);
+      }} />
 
       <MonthNav year={year} month={month} onChangeMonth={changeMonth} />
 
