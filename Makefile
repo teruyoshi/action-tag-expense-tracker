@@ -1,4 +1,4 @@
-.PHONY: dev stop build fmt fmt-frontend fmt-check fmt-check-frontend lint lint-frontend test test-frontend typecheck e2e quick-check check verify test-diff doctor migrate-up migrate-down migrate-create ci-up
+.PHONY: dev stop build fmt fmt-frontend fmt-check fmt-check-frontend lint lint-frontend test test-frontend typecheck e2e quick-check check verify test-diff doctor migrate-up migrate-down migrate-create ci-up vuln-backend vuln-frontend sec-backend sec-secrets sec-fs security-check security-check-full
 
 # ---------- DEV ----------
 
@@ -80,6 +80,27 @@ migrate-create:
 
 ci-up:
 	docker compose up -d --wait
+
+# ---------- SECURITY ----------
+
+vuln-backend:
+	docker compose exec backend govulncheck ./... || echo "⚠ govulncheck: vulnerabilities found (review output above)"
+
+vuln-frontend:
+	docker compose exec frontend npm audit --omit=dev
+
+sec-backend:
+	docker compose exec backend gosec ./... || echo "⚠ gosec: issues found (review output above)"
+
+sec-secrets:
+	docker run --rm -v $(PWD):/repo zricethezav/gitleaks:latest detect --source /repo --verbose || echo "⚠ gitleaks: potential secrets found (review output above)"
+
+sec-fs:
+	docker run --rm -v $(PWD):/repo aquasec/trivy:latest fs /repo --severity HIGH,CRITICAL || echo "⚠ trivy: vulnerabilities found (review output above)"
+
+security-check: vuln-backend vuln-frontend sec-backend sec-secrets
+
+security-check-full: security-check sec-fs
 
 # ---------- DOCTOR ----------
 

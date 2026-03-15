@@ -35,3 +35,10 @@ jobs:
 
       - name: Backend test
         run: make test
+
+      - name: Security check
+        run: make security-check
+
+      - name: Full security check (main only)
+        if: github.ref == 'refs/heads/main'
+        run: make security-check-full

@@ -1,2 +1,5 @@
 backend/tmp/
 frontend/coverage/
+.env
+.env.local
+.env.*.local
