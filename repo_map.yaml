@@ -43,7 +43,7 @@ domain:
 # Backend
 # ──────────────────────────────────────
 backend:
-  language: Go 1.23
+  language: Go 1.24
   framework: chi (router) + GORM (ORM)
   entry_point: backend/cmd/server/main.go
   port: 8080
@@ -231,11 +231,11 @@ infrastructure:
 
   ci:
     file: .github/workflows/ci.yml
-    description: GitHub Actions CI（push/PR時にDocker Compose起動後にlint・typecheck・testを実行）
+    description: GitHub Actions CI（push/PR時にDocker Compose起動後にlint・typecheck・test・security-checkを実行。main push時はsecurity-check-fullも実行）
 
   dockerfiles:
     - file: backend/Dockerfile
-      base: golang:1.23-alpine
+      base: golang:1.24-alpine
     - file: frontend/Dockerfile
       base: node:24-alpine
     - file: e2e/Dockerfile
@@ -266,6 +266,13 @@ infrastructure:
       migrate-up: DBマイグレーション適用
       migrate-down: DBマイグレーション1つ戻す
       migrate-create: 新規マイグレーションファイル作成
+      vuln-backend: Backend 脆弱性チェック（govulncheck）
+      vuln-frontend: Frontend 脆弱性チェック（npm audit）
+      sec-backend: Backend 静的セキュリティ解析（gosec）
+      sec-secrets: シークレット漏洩検出（gitleaks）
+      sec-fs: リポジトリ全体スキャン（trivy, HIGH/CRITICAL）
+      security-check: 日常用セキュリティチェック（vuln + sec）
+      security-check-full: フルセキュリティチェック（security-check + trivy）
 
 # ──────────────────────────────────────
 # 未実装・不足部分
@@ -277,3 +284,4 @@ gaps:
   - "OpenAPI仕様: api/openapi.yaml が存在しない"
   - "カスタムhooks: hooks/ が空"
   - "エラーハンドリング: Frontend側のエラー表示が alert のみ"
+  - "セキュリティ: govulncheck・gosec・npm audit・gitleaks・trivy導入済み。Semgrep・OWASP ZAPは未導入"
