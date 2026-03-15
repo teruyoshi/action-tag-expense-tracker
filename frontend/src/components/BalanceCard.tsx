@@ -1,29 +1,29 @@
-import { useState } from "react";
-import { api } from "../api/client";
+import { useState } from 'react'
+import { api } from '../api/client'
 
 interface Props {
-  balance: number;
-  onBalanceUpdate: (amount: number) => void;
+  balance: number
+  onBalanceUpdate: (amount: number) => void
 }
 
 export function BalanceCard({ balance, onBalanceUpdate }: Props) {
-  const [showModal, setShowModal] = useState(false);
-  const [balanceInput, setBalanceInput] = useState("");
+  const [showModal, setShowModal] = useState(false)
+  const [balanceInput, setBalanceInput] = useState('')
 
   const handleOpen = () => {
-    setBalanceInput(String(balance));
-    setShowModal(true);
-  };
+    setBalanceInput(String(balance))
+    setShowModal(true)
+  }
 
   const handleSubmit = () => {
-    const amount = parseInt(balanceInput, 10);
-    if (isNaN(amount)) return;
+    const amount = parseInt(balanceInput, 10)
+    if (isNaN(amount)) return
     api.updateBalance(amount).then((b) => {
-      onBalanceUpdate(b.amount);
-      setShowModal(false);
-      setBalanceInput("");
-    });
-  };
+      onBalanceUpdate(b.amount)
+      setShowModal(false)
+      setBalanceInput('')
+    })
+  }
 
   return (
     <>
@@ -58,5 +58,5 @@ export function BalanceCard({ balance, onBalanceUpdate }: Props) {
         </div>
       )}
     </>
-  );
+  )
 }

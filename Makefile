@@ -1,4 +1,4 @@
-.PHONY: dev stop build fmt lint lint-frontend test test-frontend typecheck e2e quick-check check verify test-diff doctor migrate-up migrate-down migrate-create
+.PHONY: dev stop build fmt fmt-frontend lint lint-frontend test test-frontend typecheck e2e quick-check check verify test-diff doctor migrate-up migrate-down migrate-create
 
 # ---------- DEV ----------
 
@@ -17,6 +17,9 @@ build:
 
 fmt:
 	docker compose exec backend gofmt -w .
+
+fmt-frontend:
+	docker compose exec frontend npm run format
 
 # ---------- LINT ----------
 

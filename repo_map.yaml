@@ -248,6 +248,7 @@ infrastructure:
       stop: Docker Compose停止
       build: Docker Compose ビルド
       fmt: Backend gofmt
+      fmt-frontend: Frontend Prettier
       lint: Backend go vet
       lint-frontend: Frontend ESLint
       test: Backend go test

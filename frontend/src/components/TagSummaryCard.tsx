@@ -1,10 +1,10 @@
-import type { TagSummary } from "../api/client";
+import type { TagSummary } from '../api/client'
 
 interface Props {
-  tagTotals: TagSummary[];
-  onTagDetail: (params: { tagId: number; tagName: string; year: number; month: number }) => void;
-  year: number;
-  month: number;
+  tagTotals: TagSummary[]
+  onTagDetail: (params: { tagId: number; tagName: string; year: number; month: number }) => void
+  year: number
+  month: number
 }
 
 export function TagSummaryCard({ tagTotals, onTagDetail, year, month }: Props) {
@@ -16,7 +16,11 @@ export function TagSummaryCard({ tagTotals, onTagDetail, year, month }: Props) {
       ) : (
         <ul className="tag-list">
           {tagTotals.map((t) => (
-            <li key={t.tag} className="tag-list-clickable" onClick={() => onTagDetail({ tagId: t.tag_id, tagName: t.tag, year, month })}>
+            <li
+              key={t.tag}
+              className="tag-list-clickable"
+              onClick={() => onTagDetail({ tagId: t.tag_id, tagName: t.tag, year, month })}
+            >
               <span>{t.tag}</span>
               <span>&yen;{t.total.toLocaleString()}</span>
             </li>
@@ -24,5 +28,5 @@ export function TagSummaryCard({ tagTotals, onTagDetail, year, month }: Props) {
         </ul>
       )}
     </div>
-  );
+  )
 }
