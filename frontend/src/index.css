@@ -298,6 +298,15 @@ label {
   text-align: right;
 }
 
+.date-header td {
+  background: #f0f0f0;
+  font-weight: bold;
+  font-size: 0.85rem;
+  color: #666;
+  padding: 6px 4px;
+  border-bottom: 1px solid #ddd;
+}
+
 .editable-row {
   cursor: pointer;
   transition: background 0.15s;

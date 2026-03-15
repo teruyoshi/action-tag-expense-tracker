@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { api } from "../api/client";
 import type { TagExpenseDetail } from "../api/client";
@@ -23,6 +23,15 @@ export function TagDetails() {
   }, [year, month, tagId]);
 
   const total = details.reduce((sum, d) => sum + d.amount, 0);
+
+  const groupedByDate = details.reduce<Record<string, TagExpenseDetail[]>>(
+    (groups, d) => {
+      (groups[d.date] ??= []).push(d);
+      return groups;
+    },
+    {}
+  );
+  const sortedDates = Object.keys(groupedByDate).sort();
 
   const startEdit = (d: TagExpenseDetail) => {
     setEditingId(d.id);
@@ -73,47 +82,51 @@ export function TagDetails() {
           <table className="detail-table">
             <thead>
               <tr>
-                <th>日付</th>
                 <th>項目</th>
                 <th className="amount-col">金額</th>
                 <th></th>
               </tr>
             </thead>
             <tbody>
-              {details.map((d) =>
-                editingId === d.id ? (
-                  <tr key={d.id}>
-                    <td>{d.date}</td>
-                    <td>
-                      <input
-                        type="text"
-                        value={editItem}
-                        onChange={(e) => setEditItem(e.target.value)}
-                        className="edit-input"
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="number"
-                        value={editAmount}
-                        onChange={(e) => setEditAmount(e.target.value)}
-                        className="edit-input"
-                      />
-                    </td>
-                    <td className="edit-actions">
-                      <button className="btn-save" onClick={saveEdit}>保存</button>
-                      <button className="btn-cancel" onClick={cancelEdit}>取消</button>
-                    </td>
+              {sortedDates.map((date) => (
+                <React.Fragment key={date}>
+                  <tr className="date-header">
+                    <td colSpan={3}>{date}</td>
                   </tr>
-                ) : (
-                  <tr key={d.id} className="editable-row" onClick={() => startEdit(d)}>
-                    <td>{d.date}</td>
-                    <td>{d.item || "—"}</td>
-                    <td className="amount-col">&yen;{d.amount.toLocaleString()}</td>
-                    <td></td>
-                  </tr>
-                )
-              )}
+                  {groupedByDate[date].map((d) =>
+                    editingId === d.id ? (
+                      <tr key={d.id}>
+                        <td>
+                          <input
+                            type="text"
+                            value={editItem}
+                            onChange={(e) => setEditItem(e.target.value)}
+                            className="edit-input"
+                          />
+                        </td>
+                        <td>
+                          <input
+                            type="number"
+                            value={editAmount}
+                            onChange={(e) => setEditAmount(e.target.value)}
+                            className="edit-input"
+                          />
+                        </td>
+                        <td className="edit-actions">
+                          <button className="btn-save" onClick={saveEdit}>保存</button>
+                          <button className="btn-cancel" onClick={cancelEdit}>取消</button>
+                        </td>
+                      </tr>
+                    ) : (
+                      <tr key={d.id} className="editable-row" onClick={() => startEdit(d)}>
+                        <td>{d.item || "—"}</td>
+                        <td className="amount-col">&yen;{d.amount.toLocaleString()}</td>
+                        <td></td>
+                      </tr>
+                    )
+                  )}
+                </React.Fragment>
+              ))}
             </tbody>
           </table>
         )}

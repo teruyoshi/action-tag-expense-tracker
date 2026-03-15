@@ -30,6 +30,7 @@ beforeEach(() => {
   mockApi.getTagExpenseDetails.mockResolvedValue([
     { id: 1, date: "2026-03-01", item: "電車賃", amount: 500 },
     { id: 2, date: "2026-03-05", item: "", amount: 300 },
+    { id: 3, date: "2026-03-01", item: "定期代", amount: 200 },
   ]);
 });
 
@@ -42,20 +43,34 @@ describe("TagDetails", () => {
     expect(screen.getByText("2026年3月")).toBeInTheDocument();
   });
 
-  it("明細を表示する", async () => {
+  it("明細を日付ヘッダーでグループ化して表示する", async () => {
     renderTagDetails();
     await waitFor(() => {
+      expect(screen.getByText("2026-03-01")).toBeInTheDocument();
+      expect(screen.getByText("2026-03-05")).toBeInTheDocument();
       expect(screen.getByText("電車賃")).toBeInTheDocument();
       expect(screen.getByText("¥500")).toBeInTheDocument();
+      expect(screen.getByText("定期代")).toBeInTheDocument();
+      expect(screen.getByText("¥200")).toBeInTheDocument();
       expect(screen.getByText("—")).toBeInTheDocument();
       expect(screen.getByText("¥300")).toBeInTheDocument();
+    });
+  });
+
+  it("同じ日付の明細が同じグループにまとまる", async () => {
+    renderTagDetails();
+    await waitFor(() => {
+      const dateHeaders = screen.getAllByText(/^2026-03-/);
+      expect(dateHeaders).toHaveLength(2);
+      expect(dateHeaders[0].textContent).toBe("2026-03-01");
+      expect(dateHeaders[1].textContent).toBe("2026-03-05");
     });
   });
 
   it("合計を表示する", async () => {
     renderTagDetails();
     await waitFor(() => {
-      expect(screen.getByText("¥800")).toBeInTheDocument();
+      expect(screen.getByText("¥1,000")).toBeInTheDocument();
     });
   });
 
