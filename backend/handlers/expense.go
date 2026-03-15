@@ -42,7 +42,7 @@ func (h *ExpenseHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 func (h *ExpenseHandler) Update(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
-	if err != nil {
+	if err != nil || id < 1 {
 		http.Error(w, "invalid id", http.StatusBadRequest)
 		return
 	}

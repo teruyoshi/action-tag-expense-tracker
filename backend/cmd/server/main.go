@@ -81,7 +81,14 @@ func main() {
 
 	port := getEnv("PORT", "8080")
 	fmt.Printf("Server running on :%s\n", port)
-	log.Fatal(http.ListenAndServe(":"+port, r))
+	srv := &http.Server{
+		Addr:         ":" + port,
+		Handler:      r,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 30 * time.Second,
+		IdleTimeout:  60 * time.Second,
+	}
+	log.Fatal(srv.ListenAndServe())
 }
 
 func getEnv(key, fallback string) string {
