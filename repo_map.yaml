@@ -223,7 +223,14 @@ infrastructure:
       test-frontend: Frontend Vitest
       typecheck: Frontend tsc --noEmit
       e2e: Playwright テスト
-      check: lint + lint-frontend + typecheck + test
+      quick-check: lint + lint-frontend + typecheck
+      check: quick-check + test + test-frontend
+      verify: check + e2e
+      test-diff: 変更ファイルの影響テストのみ実行
+      doctor: プロジェクト整合性チェック
+      migrate-up: DBマイグレーション適用
+      migrate-down: DBマイグレーション1つ戻す
+      migrate-create: 新規マイグレーションファイル作成
 
 # ──────────────────────────────────────
 # 未実装・不足部分
