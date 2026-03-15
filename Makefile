@@ -1,4 +1,4 @@
-.PHONY: dev stop build fmt fmt-frontend lint lint-frontend test test-frontend typecheck e2e quick-check check verify test-diff doctor migrate-up migrate-down migrate-create
+.PHONY: dev stop build fmt fmt-frontend fmt-check fmt-check-frontend lint lint-frontend test test-frontend typecheck e2e quick-check check verify test-diff doctor migrate-up migrate-down migrate-create ci-up
 
 # ---------- DEV ----------
 
@@ -20,6 +20,12 @@ fmt:
 
 fmt-frontend:
 	docker compose exec frontend npm run format
+
+fmt-check:
+	docker compose exec backend gofmt -l . | grep -q . && { echo "gofmt: unformatted files found"; docker compose exec backend gofmt -l .; exit 1; } || true
+
+fmt-check-frontend:
+	docker compose exec frontend npm run format:check
 
 # ---------- LINT ----------
 
@@ -69,6 +75,11 @@ migrate-down:
 migrate-create:
 	@read -p "Migration name: " name; \
 	docker compose exec backend migrate create -ext sql -dir /app/migrations -seq $$name
+
+# ---------- CI ----------
+
+ci-up:
+	docker compose up -d --wait
 
 # ---------- DOCTOR ----------
 

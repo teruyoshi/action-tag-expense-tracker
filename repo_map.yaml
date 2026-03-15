@@ -249,6 +249,8 @@ infrastructure:
       build: Docker Compose ビルド
       fmt: Backend gofmt
       fmt-frontend: Frontend Prettier
+      fmt-check: Backend フォーマットチェック（変更なし）
+      fmt-check-frontend: Frontend フォーマットチェック（変更なし）
       lint: Backend go vet
       lint-frontend: Frontend ESLint
       test: Backend go test
@@ -260,6 +262,7 @@ infrastructure:
       verify: check + e2e
       test-diff: 変更ファイルの影響テストのみ実行
       doctor: プロジェクト整合性チェック
+      ci-up: CI用サービス起動（docker compose up -d --wait）
       migrate-up: DBマイグレーション適用
       migrate-down: DBマイグレーション1つ戻す
       migrate-create: 新規マイグレーションファイル作成
