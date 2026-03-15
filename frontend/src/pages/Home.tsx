@@ -57,7 +57,7 @@ export function Home() {
           支出入力
         </button>
         <button className="btn-secondary" onClick={() => navigate("/tags/manage")}>
-          タグ管理
+          支出理由管理
         </button>
       </div>
     </div>

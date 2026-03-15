@@ -36,7 +36,7 @@ beforeEach(() => {
 describe("TagManage", () => {
   const renderTagManage = () => render(<MemoryRouter><TagManage /></MemoryRouter>);
 
-  it("タグ一覧を表示する", async () => {
+  it("支出理由一覧を表示する", async () => {
     renderTagManage();
     await waitFor(() => {
       expect(screen.getByText("通勤")).toBeInTheDocument();
@@ -44,26 +44,26 @@ describe("TagManage", () => {
     });
   });
 
-  it("タグがない場合はメッセージを表示する", async () => {
+  it("支出理由がない場合はメッセージを表示する", async () => {
     mockApi.getTags.mockResolvedValue([]);
     renderTagManage();
     await waitFor(() => {
-      expect(screen.getByText("タグがありません")).toBeInTheDocument();
+      expect(screen.getByText("支出理由がありません")).toBeInTheDocument();
     });
   });
 
-  it("新規タグを追加できる", async () => {
+  it("新規支出理由を追加できる", async () => {
     renderTagManage();
     const user = userEvent.setup();
     await waitFor(() => screen.getByText("通勤"));
 
-    await user.type(screen.getByPlaceholderText("タグ名"), "買い物");
+    await user.type(screen.getByPlaceholderText("支出理由名"), "買い物");
     await user.click(screen.getByText("追加"));
 
     expect(mockApi.createTag).toHaveBeenCalledWith("買い物");
   });
 
-  it("空のタグ名では追加しない", async () => {
+  it("空の支出理由名では追加しない", async () => {
     renderTagManage();
     const user = userEvent.setup();
     await waitFor(() => screen.getByText("通勤"));
@@ -72,7 +72,7 @@ describe("TagManage", () => {
     expect(mockApi.createTag).not.toHaveBeenCalled();
   });
 
-  it("タグを編集できる", async () => {
+  it("支出理由を編集できる", async () => {
     renderTagManage();
     const user = userEvent.setup();
     await waitFor(() => screen.getByText("通勤"));
@@ -101,7 +101,7 @@ describe("TagManage", () => {
     expect(screen.getByText("通勤")).toBeInTheDocument();
   });
 
-  it("タグを削除できる（confirm OK）", async () => {
+  it("支出理由を削除できる（confirm OK）", async () => {
     vi.spyOn(window, "confirm").mockReturnValue(true);
     renderTagManage();
     const user = userEvent.setup();
@@ -111,7 +111,7 @@ describe("TagManage", () => {
     expect(mockApi.deleteTag).toHaveBeenCalledWith(1);
   });
 
-  it("タグ削除をキャンセルできる（confirm Cancel）", async () => {
+  it("支出理由削除をキャンセルできる（confirm Cancel）", async () => {
     vi.spyOn(window, "confirm").mockReturnValue(false);
     renderTagManage();
     const user = userEvent.setup();

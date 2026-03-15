@@ -37,14 +37,14 @@ export function TagManage() {
   return (
     <div>
       <button className="btn-back" onClick={() => navigate("/")}>&larr; 戻る</button>
-      <h1>タグ管理</h1>
+      <h1>支出理由管理</h1>
 
       <div className="card">
-        <h2>新規タグ</h2>
+        <h2>新規支出理由</h2>
         <div className="input-row">
           <input
             type="text"
-            placeholder="タグ名"
+            placeholder="支出理由名"
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleCreate()}
@@ -54,9 +54,9 @@ export function TagManage() {
       </div>
 
       <div className="card">
-        <h2>タグ一覧</h2>
+        <h2>支出理由一覧</h2>
         {tags.length === 0 ? (
-          <p className="empty">タグがありません</p>
+          <p className="empty">支出理由がありません</p>
         ) : (
           <ul className="manage-list">
             {tags.map((tag) => (

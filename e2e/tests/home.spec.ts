@@ -24,14 +24,14 @@ test.describe("Home page", () => {
 
     await page.getByRole("button", { name: "支出入力" }).click();
 
-    await expect(page.getByText("タグを選択")).toBeVisible();
+    await expect(page.getByText("支出理由を選択")).toBeVisible();
   });
 
-  test("タグ管理ボタンから画面遷移できる", async ({ page }) => {
+  test("支出理由管理ボタンから画面遷移できる", async ({ page }) => {
     await page.goto("/");
 
-    await page.getByRole("button", { name: "タグ管理" }).click();
+    await page.getByRole("button", { name: "支出理由管理" }).click();
 
-    await expect(page.getByRole("heading", { name: "タグ管理" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "支出理由管理" })).toBeVisible();
   });
 });

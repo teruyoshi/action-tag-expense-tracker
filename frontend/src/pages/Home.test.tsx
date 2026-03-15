@@ -93,10 +93,10 @@ describe("Home", () => {
     expect(mockNavigate).toHaveBeenCalledWith("/tags/select");
   });
 
-  it("タグ管理ボタンで/tags/manageに遷移する", async () => {
+  it("支出理由管理ボタンで/tags/manageに遷移する", async () => {
     renderHome();
     const user = userEvent.setup();
-    await user.click(screen.getByText("タグ管理"));
+    await user.click(screen.getByText("支出理由管理"));
     expect(mockNavigate).toHaveBeenCalledWith("/tags/manage");
   });
 
