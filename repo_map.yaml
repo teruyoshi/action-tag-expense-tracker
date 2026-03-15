@@ -52,10 +52,10 @@ backend:
     handlers:
       description: HTTPハンドラ層。リクエスト解析・バリデーション・レスポンス生成
       files:
-        - backend/handlers/action_tag.go   # ActionTagHandler: List, Create, Update, Delete + writeJSON
+        - backend/handlers/action_tag.go   # ActionTagHandler: List, Create, Update, Delete
         - backend/handlers/event.go        # EventHandler: Create
         - backend/handlers/expense.go      # ExpenseHandler: Create
-        - backend/handlers/summary.go      # SummaryHandler: MonthTotal, TagMonthTotals, TagExpenseDetails + parseYearMonth
+        - backend/handlers/summary.go      # SummaryHandler: MonthTotal, TagMonthTotals, TagExpenseDetails
         - backend/handlers/balance.go      # BalanceHandler: Get, Update
         - backend/handlers/helpers.go      # parseDate, writeJSON
         - backend/handlers/helpers_test.go # TestWriteJSON, TestParseDate, TestParseYearMonth
