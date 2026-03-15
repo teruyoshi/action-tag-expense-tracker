@@ -29,11 +29,14 @@ repo/
 │   ├── models/               # DBモデル
 │   ├── migrations/           # DBマイグレーション
 │   └── Dockerfile
-├── frontend/src/
-│   ├── pages/                # ページコンポーネント
-│   ├── components/           # 共通コンポーネント
-│   └── api/                  # APIクライアント
+├── frontend/
+│   ├── src/
+│   │   ├── pages/            # ページコンポーネント
+│   │   ├── components/       # 共通コンポーネント
+│   │   └── api/              # APIクライアント
+│   └── Dockerfile
 ├── e2e/                      # E2Eテスト（Playwright）
+│   └── Dockerfile
 ├── scripts/                  # Make から呼ばれるスクリプト
 ├── .github/workflows/         # GitHub Actions CI
 ├── .claude/skills/            # AI開発スキル
@@ -49,8 +52,7 @@ AIは **Make 経由のみ** でプロジェクトを操作する。
 
 ```bash
 # --- 開発 ---
-make dev              # 開発環境起動（Docker + Frontend devサーバー）
-make dev-frontend     # Frontend devサーバーのみ
+make dev              # 開発環境起動（Docker Compose: db + backend + frontend）
 make stop             # Docker Compose 停止
 make build            # Docker Compose ビルド
 make fmt              # Backend フォーマット（gofmt）

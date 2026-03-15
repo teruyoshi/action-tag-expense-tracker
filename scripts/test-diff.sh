@@ -77,8 +77,9 @@ if [ -n "$FRONTEND_CHANGED" ]; then
     if [ -n "$TEST_FILES" ]; then
       echo "=== Frontend: テスト実行 ==="
       echo "$TEST_FILES"
-      cd frontend && npx vitest run $TEST_FILES || FRONTEND_RESULT=1
-      cd ..
+      # frontend/ プレフィックスを除去してコンテナ内パスに変換
+      CONTAINER_TEST_FILES=$(echo "$TEST_FILES" | sed 's|frontend/|/app/|g')
+      docker compose exec -T frontend npx vitest run $CONTAINER_TEST_FILES || FRONTEND_RESULT=1
     else
       echo "=== Frontend: 対応するテストファイルなし（スキップ）==="
     fi

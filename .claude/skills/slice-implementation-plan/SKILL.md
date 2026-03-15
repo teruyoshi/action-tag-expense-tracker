@@ -65,8 +65,8 @@ description: >
 ```
 make lint
 make test
-npm run lint
-npm run typecheck
+make lint-frontend
+make typecheck
 make e2e  # E2E変更がある場合
 ```
 

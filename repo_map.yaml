@@ -6,7 +6,7 @@ project:
   description: 支出理由ベースの家計簿Webアプリ。行動（例：通勤、外食）にタグを付け、そのタグに紐づく支出を記録・集計する。
   architecture: モノレポ（Backend Go + Frontend React/TypeScript）
   database: MySQL 8.0
-  container: Docker Compose（db + backend）
+  container: Docker Compose（db + backend + frontend + e2e）
 
 # ──────────────────────────────────────
 # ドメインモデル
@@ -220,20 +220,31 @@ infrastructure:
         build: ./backend
         port: 8080
         depends_on: db (healthy)
+      frontend:
+        build: ./frontend
+        port: 5173
+        depends_on: backend
+      e2e:
+        build: ./e2e
+        profile: e2e
+        depends_on: frontend
 
   ci:
     file: .github/workflows/ci.yml
-    description: GitHub Actions CI（push/PR時にlint・typecheck・testを実行）
+    description: GitHub Actions CI（push/PR時にDocker Compose起動後にlint・typecheck・testを実行）
 
-  dockerfile:
-    file: backend/Dockerfile
-    base: golang:1.22-alpine
+  dockerfiles:
+    - file: backend/Dockerfile
+      base: golang:1.23-alpine
+    - file: frontend/Dockerfile
+      base: node:24-alpine
+    - file: e2e/Dockerfile
+      base: mcr.microsoft.com/playwright:v1.52.0-noble
 
   makefile:
     file: Makefile
     targets:
-      dev: Docker Compose起動 + Frontend devサーバー
-      dev-frontend: Frontend devサーバーのみ
+      dev: Docker Compose起動（db + backend + frontend）
       stop: Docker Compose停止
       build: Docker Compose ビルド
       fmt: Backend gofmt
@@ -242,7 +253,7 @@ infrastructure:
       test: Backend go test
       test-frontend: Frontend Vitest
       typecheck: Frontend tsc --noEmit
-      e2e: Playwright テスト
+      e2e: Playwright テスト（Docker Compose e2e プロファイル）
       quick-check: lint + lint-frontend + typecheck
       check: quick-check + test + test-frontend
       verify: check + e2e

@@ -179,10 +179,14 @@ AIは **これらの承認なしに次のフェーズに進まない**。
 ## コマンド参照
 
 ```bash
-make dev        # 開発環境起動
-make lint       # Backend lint
-make test       # Backend テスト
-npm run lint    # Frontend lint
-npm run typecheck # Frontend 型チェック
-make e2e        # E2E テスト
+make dev           # 開発環境起動（Docker Compose）
+make lint          # Backend lint
+make test          # Backend テスト
+make lint-frontend # Frontend lint
+make typecheck     # Frontend 型チェック
+make test-frontend # Frontend テスト
+make e2e           # E2E テスト
+make quick-check   # 編集直後の検証
+make check         # 実装完了時の検証
+make verify        # マージ前の最終検証
 ```

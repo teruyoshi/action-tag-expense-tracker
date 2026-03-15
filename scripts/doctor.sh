@@ -112,6 +112,18 @@ else
     fail "backend/Dockerfile が存在しません"
   fi
 
+  if [ -f "frontend/Dockerfile" ]; then
+    pass "frontend/Dockerfile が存在します"
+  else
+    fail "frontend/Dockerfile が存在しません"
+  fi
+
+  if [ -f "e2e/Dockerfile" ]; then
+    pass "e2e/Dockerfile が存在します"
+  else
+    fail "e2e/Dockerfile が存在しません"
+  fi
+
   # docker compose が利用可能か
   if docker compose version > /dev/null 2>&1; then
     pass "docker compose が利用可能です"
@@ -137,7 +149,7 @@ echo ""
 
 echo "=== 4. ディレクトリ構造 ==="
 
-REQUIRED_DIRS="backend backend/cmd/server backend/handlers backend/repositories backend/models frontend frontend/src frontend/src/pages frontend/src/api skills"
+REQUIRED_DIRS="backend backend/cmd/server backend/handlers backend/repositories backend/models frontend frontend/src frontend/src/pages frontend/src/api .claude/skills"
 for dir in $REQUIRED_DIRS; do
   if [ -d "$dir" ]; then
     pass "$dir/ が存在します"
@@ -162,11 +174,13 @@ fi
 if [ -f "frontend/package.json" ]; then
   pass "frontend/package.json が存在します"
 
-  # node_modules の存在
+  # node_modules の存在（ホストまたはコンテナ）
   if [ -d "frontend/node_modules" ]; then
-    pass "frontend/node_modules が存在します"
+    pass "frontend/node_modules が存在します（ホスト）"
+  elif docker compose ps --status running --format '{{.Name}}' 2>/dev/null | grep -q frontend; then
+    pass "frontend/node_modules はコンテナ内に存在します"
   else
-    warn "frontend/node_modules がありません（cd frontend && npm install を実行してください）"
+    warn "frontend/node_modules がありません（make dev でコンテナを起動してください）"
   fi
 
   # テストツールの導入状況

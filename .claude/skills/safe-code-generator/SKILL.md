@@ -95,8 +95,8 @@ make lint
 make test
 
 # Frontend
-npm run lint
-npm run typecheck
+make lint-frontend
+make typecheck
 ```
 
 エラーがあれば修正してから完了とする。

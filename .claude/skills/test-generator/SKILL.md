@@ -17,7 +17,7 @@ description: >
 | 層 | ツール | 対象 | 実行 |
 |---|---|---|---|
 | Backend Unit | `go test` | services, repositories, handlers | `make test` |
-| Frontend Unit | Vitest | components, hooks, utils | `npm run test` |
+| Frontend Unit | Vitest | components, hooks, utils | `make test-frontend` |
 | E2E | Playwright | ユーザーフロー全体 | `make e2e` |
 
 ## 手順
@@ -132,7 +132,7 @@ test('ユーザーが○○できる', async ({ page }) => {
 
 ```bash
 make test          # Backend
-npm run test       # Frontend
+make test-frontend # Frontend
 make e2e           # E2E（変更がある場合）
 ```
 
