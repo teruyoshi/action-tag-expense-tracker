@@ -36,6 +36,9 @@ jobs:
       - name: Backend test
         run: make test
 
+      - name: E2E test
+        run: make e2e
+
       - name: Security check
         run: make security-check
 

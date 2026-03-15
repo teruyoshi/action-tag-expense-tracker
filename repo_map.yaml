@@ -231,7 +231,7 @@ infrastructure:
 
   ci:
     file: .github/workflows/ci.yml
-    description: GitHub Actions CI（push/PR時にDocker Compose起動後にfmt-check・lint・typecheck・test・security-checkを実行。main push時はsecurity-check-fullも実行）
+    description: GitHub Actions CI（push/PR時にDocker Compose起動後にfmt-check・lint・typecheck・test・e2e・security-checkを実行。main push時はsecurity-check-fullも実行）
 
   dockerfiles:
     - file: backend/Dockerfile
