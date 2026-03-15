@@ -57,8 +57,14 @@ backend:
         - backend/handlers/expense.go      # ExpenseHandler: Create
         - backend/handlers/summary.go      # SummaryHandler: MonthTotal, TagMonthTotals, TagExpenseDetails
         - backend/handlers/balance.go      # BalanceHandler: Get, Update
-        - backend/handlers/helpers.go      # parseDate, writeJSON
-        - backend/handlers/helpers_test.go # TestWriteJSON, TestParseDate, TestParseYearMonth
+        - backend/handlers/helpers.go          # parseDate, writeJSON
+        - backend/handlers/mocks_test.go       # テスト用モックリポジトリ
+        - backend/handlers/helpers_test.go     # TestWriteJSON, TestParseDate, TestParseYearMonth
+        - backend/handlers/action_tag_test.go  # TestActionTagHandler (List, Create, Update, Delete)
+        - backend/handlers/event_test.go       # TestEventHandler (Create)
+        - backend/handlers/expense_test.go     # TestExpenseHandler (Create)
+        - backend/handlers/summary_test.go     # TestSummaryHandler (MonthTotal, TagMonthTotals, TagExpenseDetails)
+        - backend/handlers/balance_test.go     # TestBalanceHandler (Get, Update)
 
     repositories:
       description: DBアクセス層。GORMによるCRUD操作
@@ -91,7 +97,7 @@ backend:
   notes:
     - services層はまだ存在しない（handler → repository の直接呼び出し）
     - repositoryインターフェースが定義済み（interfaces.go）
-    - Backend単体テストあり（handlers/helpers_test.go）
+    - Backend単体テストあり（全handler + helpers）。モックリポジトリによるテスト
 
 # ──────────────────────────────────────
 # Frontend
@@ -161,9 +167,18 @@ frontend:
       - frontend/src/pages/TagManage.test.tsx  # TagManageページのコンポーネントテスト
       - frontend/src/pages/TagDetails.test.tsx # TagDetailsページのコンポーネントテスト
 
+  components:
+    description: 再利用可能なUIコンポーネント（Homeページから分離）
+    files:
+      - frontend/src/components/BalanceCard.tsx      # 所持金表示・設定モーダル
+      - frontend/src/components/BalanceCard.test.tsx  # BalanceCardのテスト
+      - frontend/src/components/MonthNav.tsx          # 月ナビゲーション（前月・次月）
+      - frontend/src/components/MonthNav.test.tsx     # MonthNavのテスト
+      - frontend/src/components/TagSummaryCard.tsx    # 支出理由別サマリー表示
+      - frontend/src/components/TagSummaryCard.test.tsx # TagSummaryCardのテスト
+
   notes:
     - hooks/ はまだ存在しない
-    - components/ はまだ存在しない（全UIがpages内に直書き）
     - utils/ はまだ存在しない
 
 # ──────────────────────────────────────
@@ -205,9 +220,8 @@ infrastructure:
 # ──────────────────────────────────────
 gaps:
   - "services層: handler→repoの直接呼び出しになっている"
-  - "Backendテスト: helpers_test.go のみ。handler/repository の統合テストなし"
-  - "E2Eテスト: Playwright設定なし"
+  - "Backendテスト: handler層は全テスト済み。repository層のテストなし"
+  - "E2Eテスト: Playwright設定済み。Home画面のみ。他画面のテストなし"
   - "OpenAPI仕様: api/openapi.yaml が存在しない"
-  - "共通コンポーネント: components/ が空"
   - "カスタムhooks: hooks/ が空"
   - "エラーハンドリング: Frontend側のエラー表示が alert のみ"
