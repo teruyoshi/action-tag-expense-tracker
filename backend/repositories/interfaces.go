@@ -17,6 +17,7 @@ type EventRepo interface {
 
 type ExpenseRepo interface {
 	Create(expense *models.Expense) error
+	Update(expense *models.Expense) error
 }
 
 type SummaryRepo interface {

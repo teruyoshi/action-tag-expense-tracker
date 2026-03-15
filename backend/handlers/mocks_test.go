@@ -91,6 +91,10 @@ func (m *mockExpenseRepo) Create(expense *models.Expense) error {
 	return nil
 }
 
+func (m *mockExpenseRepo) Update(expense *models.Expense) error {
+	return m.err
+}
+
 // --- SummaryRepo mock ---
 
 type mockSummaryRepo struct {

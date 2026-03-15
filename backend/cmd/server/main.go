@@ -70,6 +70,7 @@ func main() {
 	r.Post("/events", eventHandler.Create)
 
 	r.Post("/expenses", expenseHandler.Create)
+	r.Put("/expenses/{id}", expenseHandler.Update)
 
 	r.Get("/summary/month", summaryHandler.MonthTotal)
 	r.Get("/summary/tag", summaryHandler.TagMonthTotals)

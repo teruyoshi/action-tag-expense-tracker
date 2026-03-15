@@ -15,6 +15,7 @@ type TagSummary struct {
 }
 
 type TagExpenseDetail struct {
+	ID     uint   `json:"id"`
 	Date   string `json:"date"`
 	Item   string `json:"item"`
 	Amount int    `json:"amount"`
@@ -48,7 +49,7 @@ func (r *SummaryRepository) TagMonthTotals(year, month int) ([]TagSummary, error
 func (r *SummaryRepository) TagExpenseDetails(year, month, tagID int) ([]TagExpenseDetail, error) {
 	var results []TagExpenseDetail
 	err := r.DB.Raw(`
-		SELECT DATE_FORMAT(ev.date, '%Y-%m-%d') AS date, e.item, e.amount
+		SELECT e.id, DATE_FORMAT(ev.date, '%Y-%m-%d') AS date, e.item, e.amount
 		FROM expenses e
 		JOIN events ev ON e.event_id = ev.id
 		WHERE YEAR(ev.date) = ? AND MONTH(ev.date) = ? AND ev.action_tag_id = ?

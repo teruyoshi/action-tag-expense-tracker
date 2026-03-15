@@ -13,3 +13,7 @@ type ExpenseRepository struct {
 func (r *ExpenseRepository) Create(expense *models.Expense) error {
 	return r.DB.Create(expense).Error
 }
+
+func (r *ExpenseRepository) Update(expense *models.Expense) error {
+	return r.DB.Save(expense).Error
+}

@@ -38,6 +38,7 @@ export interface TagSummary {
 }
 
 export interface TagExpenseDetail {
+  id: number;
   date: string;
   item: string;
   amount: number;
@@ -60,6 +61,9 @@ export const api = {
 
   createExpense: (event_id: number, item: string, amount: number) =>
     request<Expense>("/expenses", { method: "POST", body: JSON.stringify({ event_id, item: item || undefined, amount }) }),
+
+  updateExpense: (id: number, item: string, amount: number) =>
+    request<Expense>(`/expenses/${id}`, { method: "PUT", body: JSON.stringify({ item: item || undefined, amount }) }),
 
   getMonthTotal: (year: number, month: number) =>
     request<{ total: number }>(`/summary/month?year=${year}&month=${month}`),

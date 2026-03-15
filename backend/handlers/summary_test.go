@@ -125,10 +125,10 @@ func TestSummaryHandler_TagExpenseDetails(t *testing.T) {
 			name:  "returns details",
 			query: "?year=2026&month=3&tag_id=1",
 			repo: &mockSummaryRepo{tagDetails: []repositories.TagExpenseDetail{
-				{Date: "2026-03-15", Item: "電車賃", Amount: 500},
+				{ID: 1, Date: "2026-03-15", Item: "電車賃", Amount: 500},
 			}},
 			wantCode: http.StatusOK,
-			wantBody: `[{"date":"2026-03-15","item":"電車賃","amount":500}]`,
+			wantBody: `[{"id":1,"date":"2026-03-15","item":"電車賃","amount":500}]`,
 		},
 		{
 			name:     "rejects missing tag_id",

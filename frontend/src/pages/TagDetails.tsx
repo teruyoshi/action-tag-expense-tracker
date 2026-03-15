@@ -12,6 +12,9 @@ export function TagDetails() {
   const month = Number(searchParams.get("month"));
 
   const [details, setDetails] = useState<TagExpenseDetail[]>([]);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editItem, setEditItem] = useState("");
+  const [editAmount, setEditAmount] = useState("");
 
   useEffect(() => {
     if (tagId && year && month) {
@@ -20,6 +23,36 @@ export function TagDetails() {
   }, [year, month, tagId]);
 
   const total = details.reduce((sum, d) => sum + d.amount, 0);
+
+  const startEdit = (d: TagExpenseDetail) => {
+    setEditingId(d.id);
+    setEditItem(d.item);
+    setEditAmount(String(d.amount));
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+  };
+
+  const saveEdit = async () => {
+    if (editingId === null) return;
+    const amount = Number(editAmount);
+    if (!amount || amount <= 0) {
+      alert("金額は1以上を入力してください");
+      return;
+    }
+    try {
+      await api.updateExpense(editingId, editItem, amount);
+      setDetails((prev) =>
+        prev.map((d) =>
+          d.id === editingId ? { ...d, item: editItem, amount } : d
+        )
+      );
+      setEditingId(null);
+    } catch {
+      alert("更新に失敗しました");
+    }
+  };
 
   return (
     <div>
@@ -43,16 +76,44 @@ export function TagDetails() {
                 <th>日付</th>
                 <th>項目</th>
                 <th className="amount-col">金額</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
-              {details.map((d, i) => (
-                <tr key={i}>
-                  <td>{d.date}</td>
-                  <td>{d.item || "—"}</td>
-                  <td className="amount-col">&yen;{d.amount.toLocaleString()}</td>
-                </tr>
-              ))}
+              {details.map((d) =>
+                editingId === d.id ? (
+                  <tr key={d.id}>
+                    <td>{d.date}</td>
+                    <td>
+                      <input
+                        type="text"
+                        value={editItem}
+                        onChange={(e) => setEditItem(e.target.value)}
+                        className="edit-input"
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type="number"
+                        value={editAmount}
+                        onChange={(e) => setEditAmount(e.target.value)}
+                        className="edit-input"
+                      />
+                    </td>
+                    <td className="edit-actions">
+                      <button className="btn-save" onClick={saveEdit}>保存</button>
+                      <button className="btn-cancel" onClick={cancelEdit}>取消</button>
+                    </td>
+                  </tr>
+                ) : (
+                  <tr key={d.id} className="editable-row" onClick={() => startEdit(d)}>
+                    <td>{d.date}</td>
+                    <td>{d.item || "—"}</td>
+                    <td className="amount-col">&yen;{d.amount.toLocaleString()}</td>
+                    <td></td>
+                  </tr>
+                )
+              )}
             </tbody>
           </table>
         )}

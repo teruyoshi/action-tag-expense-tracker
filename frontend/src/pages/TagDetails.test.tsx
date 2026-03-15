@@ -18,6 +18,7 @@ vi.mock("react-router-dom", async () => {
 vi.mock("../api/client", () => ({
   api: {
     getTagExpenseDetails: vi.fn(),
+    updateExpense: vi.fn(),
   },
 }));
 
@@ -27,8 +28,8 @@ const mockApi = vi.mocked(api);
 beforeEach(() => {
   vi.clearAllMocks();
   mockApi.getTagExpenseDetails.mockResolvedValue([
-    { date: "2026-03-01", item: "電車賃", amount: 500 },
-    { date: "2026-03-05", item: "", amount: 300 },
+    { id: 1, date: "2026-03-01", item: "電車賃", amount: 500 },
+    { id: 2, date: "2026-03-05", item: "", amount: 300 },
   ]);
 });
 
@@ -76,5 +77,95 @@ describe("TagDetails", () => {
   it("正しいパラメータでAPIを呼ぶ", () => {
     renderTagDetails();
     expect(mockApi.getTagExpenseDetails).toHaveBeenCalledWith(2026, 3, 1);
+  });
+
+  it("行をクリックすると編集モードになる", async () => {
+    renderTagDetails();
+    const user = userEvent.setup();
+    await waitFor(() => {
+      expect(screen.getByText("電車賃")).toBeInTheDocument();
+    });
+    await user.click(screen.getByText("電車賃"));
+    expect(screen.getByDisplayValue("電車賃")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("500")).toBeInTheDocument();
+    expect(screen.getByText("保存")).toBeInTheDocument();
+    expect(screen.getByText("取消")).toBeInTheDocument();
+  });
+
+  it("取消ボタンで編集モードを終了する", async () => {
+    renderTagDetails();
+    const user = userEvent.setup();
+    await waitFor(() => {
+      expect(screen.getByText("電車賃")).toBeInTheDocument();
+    });
+    await user.click(screen.getByText("電車賃"));
+    await user.click(screen.getByText("取消"));
+    expect(screen.queryByDisplayValue("電車賃")).not.toBeInTheDocument();
+    expect(screen.getByText("電車賃")).toBeInTheDocument();
+  });
+
+  it("保存ボタンで更新APIを呼び明細を更新する", async () => {
+    mockApi.updateExpense.mockResolvedValue({ id: 1, event_id: 1, item: "バス代", amount: 600 });
+    renderTagDetails();
+    const user = userEvent.setup();
+    await waitFor(() => {
+      expect(screen.getByText("電車賃")).toBeInTheDocument();
+    });
+    await user.click(screen.getByText("電車賃"));
+
+    const itemInput = screen.getByDisplayValue("電車賃");
+    await user.clear(itemInput);
+    await user.type(itemInput, "バス代");
+
+    const amountInput = screen.getByDisplayValue("500");
+    await user.clear(amountInput);
+    await user.type(amountInput, "600");
+
+    await user.click(screen.getByText("保存"));
+
+    expect(mockApi.updateExpense).toHaveBeenCalledWith(1, "バス代", 600);
+    await waitFor(() => {
+      expect(screen.getByText("バス代")).toBeInTheDocument();
+      expect(screen.getByText("¥600")).toBeInTheDocument();
+    });
+  });
+
+  it("金額が0以下の場合はalertを表示して更新しない", async () => {
+    const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
+    renderTagDetails();
+    const user = userEvent.setup();
+    await waitFor(() => {
+      expect(screen.getByText("電車賃")).toBeInTheDocument();
+    });
+    await user.click(screen.getByText("電車賃"));
+
+    const amountInput = screen.getByDisplayValue("500");
+    await user.clear(amountInput);
+    await user.type(amountInput, "0");
+
+    await user.click(screen.getByText("保存"));
+
+    expect(alertSpy).toHaveBeenCalledWith("金額は1以上を入力してください");
+    expect(mockApi.updateExpense).not.toHaveBeenCalled();
+    alertSpy.mockRestore();
+  });
+
+  it("更新API失敗時にalertを表示する", async () => {
+    const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
+    mockApi.updateExpense.mockRejectedValue(new Error("server error"));
+    renderTagDetails();
+    const user = userEvent.setup();
+    await waitFor(() => {
+      expect(screen.getByText("電車賃")).toBeInTheDocument();
+    });
+    await user.click(screen.getByText("電車賃"));
+    await user.click(screen.getByText("保存"));
+
+    await waitFor(() => {
+      expect(alertSpy).toHaveBeenCalledWith("更新に失敗しました");
+    });
+    // 編集モードが維持され、元の値がinputに残っていること
+    expect(screen.getByDisplayValue("500")).toBeInTheDocument();
+    alertSpy.mockRestore();
   });
 });

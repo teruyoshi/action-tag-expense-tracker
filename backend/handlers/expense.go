@@ -3,9 +3,12 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"action-tag-expense-tracker/backend/models"
 	"action-tag-expense-tracker/backend/repositories"
+
+	"github.com/go-chi/chi/v5"
 )
 
 type ExpenseHandler struct {
@@ -34,5 +37,35 @@ func (h *ExpenseHandler) Create(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	w.WriteHeader(http.StatusCreated)
+	writeJSON(w, expense)
+}
+
+func (h *ExpenseHandler) Update(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		http.Error(w, "invalid id", http.StatusBadRequest)
+		return
+	}
+	var input struct {
+		Item   string `json:"item"`
+		Amount int    `json:"amount"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	if input.Amount <= 0 {
+		http.Error(w, "positive amount is required", http.StatusBadRequest)
+		return
+	}
+	expense := &models.Expense{
+		ID:     uint(id),
+		Item:   input.Item,
+		Amount: input.Amount,
+	}
+	if err := h.Repo.Update(expense); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	writeJSON(w, expense)
 }
