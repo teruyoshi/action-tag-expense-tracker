@@ -201,7 +201,7 @@ frontend:
 e2e:
   framework: Playwright
   config: e2e/playwright.config.ts
-  base_url: http://localhost:5173
+  base_url: http://frontend:5173  # Docker Compose内のサービス名
   test_files:
     - e2e/tests/home.spec.ts  # トップページの表示・画面遷移テスト
 
@@ -231,7 +231,7 @@ infrastructure:
 
   ci:
     file: .github/workflows/ci.yml
-    description: GitHub Actions CI（push/PR時にDocker Compose起動後にlint・typecheck・test・security-checkを実行。main push時はsecurity-check-fullも実行）
+    description: GitHub Actions CI（push/PR時にDocker Compose起動後にfmt-check・lint・typecheck・test・security-checkを実行。main push時はsecurity-check-fullも実行）
 
   dockerfiles:
     - file: backend/Dockerfile
