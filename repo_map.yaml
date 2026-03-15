@@ -221,6 +221,10 @@ infrastructure:
         port: 8080
         depends_on: db (healthy)
 
+  ci:
+    file: .github/workflows/ci.yml
+    description: GitHub Actions CI（push/PR時にlint・typecheck・testを実行）
+
   dockerfile:
     file: backend/Dockerfile
     base: golang:1.22-alpine
@@ -231,6 +235,8 @@ infrastructure:
       dev: Docker Compose起動 + Frontend devサーバー
       dev-frontend: Frontend devサーバーのみ
       stop: Docker Compose停止
+      build: Docker Compose ビルド
+      fmt: Backend gofmt
       lint: Backend go vet
       lint-frontend: Frontend ESLint
       test: Backend go test

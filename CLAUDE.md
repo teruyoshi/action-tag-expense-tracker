@@ -35,6 +35,7 @@ repo/
 │   └── api/                  # APIクライアント
 ├── e2e/                      # E2Eテスト（Playwright）
 ├── scripts/                  # Make から呼ばれるスクリプト
+├── .github/workflows/         # GitHub Actions CI
 ├── .claude/skills/            # AI開発スキル
 ├── repo_map.yaml             # AI用コードベース地図
 ├── Makefile
@@ -51,6 +52,8 @@ AIは **Make 経由のみ** でプロジェクトを操作する。
 make dev              # 開発環境起動（Docker + Frontend devサーバー）
 make dev-frontend     # Frontend devサーバーのみ
 make stop             # Docker Compose 停止
+make build            # Docker Compose ビルド
+make fmt              # Backend フォーマット（gofmt）
 
 # --- AI検証（3段階） ---
 make quick-check      # 編集直後: lint + lint-frontend + typecheck
