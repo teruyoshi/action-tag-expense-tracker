@@ -8,9 +8,9 @@ interface Props {
 }
 
 function formatDiff(diff: number): string {
-  if (diff > 0) return `+¥${diff.toLocaleString()}`
-  if (diff < 0) return `-¥${Math.abs(diff).toLocaleString()}`
-  return '±¥0'
+  if (diff > 0) return `前月比 ▲¥${diff.toLocaleString()}`
+  if (diff < 0) return `前月比 ▼¥${Math.abs(diff).toLocaleString()}`
+  return '前月比 ±¥0'
 }
 
 function diffClassName(diff: number): string {
