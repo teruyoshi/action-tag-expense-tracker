@@ -55,7 +55,7 @@ backend:
         - backend/handlers/action_tag.go   # ActionTagHandler: List, Create, Update, Delete
         - backend/handlers/event.go        # EventHandler: Create
         - backend/handlers/expense.go      # ExpenseHandler: Create, Update
-        - backend/handlers/summary.go      # SummaryHandler: MonthTotal, TagMonthTotals, TagExpenseDetails
+        - backend/handlers/summary.go      # SummaryHandler: MonthTotal, TagMonthTotals, TagMonthTotalsWithDiff, TagExpenseDetails
         - backend/handlers/balance.go      # BalanceHandler: Get, Update（Update時に減額分の支出を自動作成）
         - backend/handlers/helpers.go          # parseDate, writeJSON
         - backend/handlers/mocks_test.go       # テスト用モックリポジトリ
@@ -63,23 +63,23 @@ backend:
         - backend/handlers/action_tag_test.go  # TestActionTagHandler (List, Create, Update, Delete)
         - backend/handlers/event_test.go       # TestEventHandler (Create)
         - backend/handlers/expense_test.go     # TestExpenseHandler (Create, Update)
-        - backend/handlers/summary_test.go     # TestSummaryHandler (MonthTotal, TagMonthTotals, TagExpenseDetails)
+        - backend/handlers/summary_test.go     # TestSummaryHandler (MonthTotal, TagMonthTotals, TagMonthTotalsWithDiff, TagExpenseDetails)
         - backend/handlers/balance_test.go     # TestBalanceHandler (Get, Update)
 
     repositories:
       description: DBアクセス層。GORMによるCRUD操作
       files:
-        - backend/repositories/interfaces.go  # ActionTagRepo, EventRepo, ExpenseRepo, SummaryRepo, BalanceRepo インターフェース定義
+        - backend/repositories/interfaces.go  # ActionTagRepo, EventRepo, ExpenseRepo, SummaryRepo(TagMonthTotalsWithDiff含む), BalanceRepo インターフェース定義
         - backend/repositories/action_tag.go  # FindAll, Create, Update, Delete, FindByID, FindOrCreateByName
         - backend/repositories/event.go       # Create
         - backend/repositories/expense.go     # Create, Update
-        - backend/repositories/summary.go     # MonthTotal, TagMonthTotals, TagExpenseDetails (生SQL) + TagSummary, TagExpenseDetail型
+        - backend/repositories/summary.go     # MonthTotal, TagMonthTotals, TagMonthTotalsWithDiff, TagExpenseDetails (生SQL) + TagSummary, TagSummaryWithDiff, TagExpenseDetail型
         - backend/repositories/balance.go     # Get, Update, Subtract
         - backend/repositories/testhelper_test.go  # go-sqlmock によるテスト用DB初期化ヘルパー
         - backend/repositories/action_tag_test.go  # ActionTagRepository の単体テスト
         - backend/repositories/event_test.go       # EventRepository の単体テスト
         - backend/repositories/expense_test.go     # ExpenseRepository の単体テスト
-        - backend/repositories/summary_test.go     # SummaryRepository の単体テスト
+        - backend/repositories/summary_test.go     # SummaryRepository の単体テスト（TagMonthTotalsWithDiff含む）
         - backend/repositories/balance_test.go     # BalanceRepository の単体テスト
 
     models:
@@ -97,6 +97,7 @@ backend:
     - method: PUT     path: /expenses/{id}     handler: ExpenseHandler.Update
     - method: GET     path: /summary/month     handler: SummaryHandler.MonthTotal     query: [year, month]
     - method: GET     path: /summary/tag       handler: SummaryHandler.TagMonthTotals query: [year, month]
+    - method: GET     path: /summary/tag/diff   handler: SummaryHandler.TagMonthTotalsWithDiff query: [year, month]
     - method: GET     path: /summary/tag/details handler: SummaryHandler.TagExpenseDetails query: [year, month, tag_id]
     - method: GET     path: /balance           handler: BalanceHandler.Get
     - method: PUT     path: /balance           handler: BalanceHandler.Update
@@ -156,7 +157,7 @@ frontend:
 
   api_client:
     file: frontend/src/api/client.ts
-    description: fetch ベースのAPIクライアント。型定義（ActionTag, Event, Expense, TagSummary, TagExpenseDetail, Balance）も含む
+    description: fetch ベースのAPIクライアント。型定義（ActionTag, Event, Expense, TagSummary, TagSummaryWithDiff, TagExpenseDetail, Balance）も含む
     base_url: http://localhost:8080
 
   assets:

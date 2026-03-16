@@ -1,6 +1,8 @@
 package repositories
 
 import (
+	"sort"
+
 	"gorm.io/gorm"
 )
 
@@ -44,6 +46,71 @@ func (r *SummaryRepository) TagMonthTotals(year, month int) ([]TagSummary, error
 		ORDER BY total DESC
 	`, year, month).Scan(&results).Error
 	return results, err
+}
+
+type TagSummaryWithDiff struct {
+	TagID     uint   `json:"tag_id"`
+	Tag       string `json:"tag"`
+	Total     int    `json:"total"`
+	PrevTotal int    `json:"prev_total"`
+	Diff      int    `json:"diff"`
+}
+
+func (r *SummaryRepository) TagMonthTotalsWithDiff(year, month int) ([]TagSummaryWithDiff, error) {
+	current, err := r.TagMonthTotals(year, month)
+	if err != nil {
+		return nil, err
+	}
+
+	prevYear, prevMonth := year, month-1
+	if prevMonth < 1 {
+		prevYear--
+		prevMonth = 12
+	}
+
+	prev, err := r.TagMonthTotals(prevYear, prevMonth)
+	if err != nil {
+		return nil, err
+	}
+
+	prevMap := make(map[uint]TagSummary)
+	for _, p := range prev {
+		prevMap[p.TagID] = p
+	}
+
+	seen := make(map[uint]bool)
+	var results []TagSummaryWithDiff
+
+	for _, c := range current {
+		seen[c.TagID] = true
+		p := prevMap[c.TagID]
+		results = append(results, TagSummaryWithDiff{
+			TagID:     c.TagID,
+			Tag:       c.Tag,
+			Total:     c.Total,
+			PrevTotal: p.Total,
+			Diff:      c.Total - p.Total,
+		})
+	}
+
+	for _, p := range prev {
+		if seen[p.TagID] {
+			continue
+		}
+		results = append(results, TagSummaryWithDiff{
+			TagID:     p.TagID,
+			Tag:       p.Tag,
+			Total:     0,
+			PrevTotal: p.Total,
+			Diff:      -p.Total,
+		})
+	}
+
+	sort.Slice(results, func(i, j int) bool {
+		return results[i].Total > results[j].Total
+	})
+
+	return results, nil
 }
 
 func (r *SummaryRepository) TagExpenseDetails(year, month, tagID int) ([]TagExpenseDetail, error) {

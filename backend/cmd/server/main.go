@@ -74,6 +74,7 @@ func main() {
 
 	r.Get("/summary/month", summaryHandler.MonthTotal)
 	r.Get("/summary/tag", summaryHandler.TagMonthTotals)
+	r.Get("/summary/tag/diff", summaryHandler.TagMonthTotalsWithDiff)
 	r.Get("/summary/tag/details", summaryHandler.TagExpenseDetails)
 
 	r.Get("/balance", balanceHandler.Get)

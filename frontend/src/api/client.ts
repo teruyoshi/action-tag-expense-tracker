@@ -37,6 +37,14 @@ export interface TagSummary {
   total: number
 }
 
+export interface TagSummaryWithDiff {
+  tag_id: number
+  tag: string
+  total: number
+  prev_total: number
+  diff: number
+}
+
 export interface TagExpenseDetail {
   id: number
   date: string
@@ -78,6 +86,9 @@ export const api = {
 
   getTagTotals: (year: number, month: number) =>
     request<TagSummary[]>(`/summary/tag?year=${year}&month=${month}`),
+
+  getTagTotalsWithDiff: (year: number, month: number) =>
+    request<TagSummaryWithDiff[]>(`/summary/tag/diff?year=${year}&month=${month}`),
 
   getTagExpenseDetails: (year: number, month: number, tagId: number) =>
     request<TagExpenseDetail[]>(`/summary/tag/details?year=${year}&month=${month}&tag_id=${tagId}`),

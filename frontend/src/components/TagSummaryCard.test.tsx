@@ -5,8 +5,8 @@ import { TagSummaryCard } from './TagSummaryCard'
 
 describe('TagSummaryCard', () => {
   const tagTotals = [
-    { tag_id: 1, tag: '通勤', total: 5000 },
-    { tag_id: 2, tag: '外食', total: 10000 },
+    { tag_id: 1, tag: '通勤', total: 5000, prev_total: 3000, diff: 2000 },
+    { tag_id: 2, tag: '外食', total: 10000, prev_total: 12000, diff: -2000 },
   ]
 
   it('タグ別合計を表示する', () => {
@@ -20,6 +20,18 @@ describe('TagSummaryCard', () => {
   it('データがない場合は「データなし」を表示する', () => {
     render(<TagSummaryCard tagTotals={[]} onTagDetail={vi.fn()} year={2026} month={3} />)
     expect(screen.getByText('データなし')).toBeInTheDocument()
+  })
+
+  it('前月比の差分を表示する', () => {
+    render(<TagSummaryCard tagTotals={tagTotals} onTagDetail={vi.fn()} year={2026} month={3} />)
+    expect(screen.getByText('+¥2,000')).toBeInTheDocument()
+    expect(screen.getByText('-¥2,000')).toBeInTheDocument()
+  })
+
+  it('差分ゼロの場合は±¥0を表示する', () => {
+    const zeroData = [{ tag_id: 1, tag: '通勤', total: 5000, prev_total: 5000, diff: 0 }]
+    render(<TagSummaryCard tagTotals={zeroData} onTagDetail={vi.fn()} year={2026} month={3} />)
+    expect(screen.getByText('±¥0')).toBeInTheDocument()
   })
 
   it('タグクリックでonTagDetailが呼ばれる', async () => {

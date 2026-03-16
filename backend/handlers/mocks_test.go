@@ -98,10 +98,11 @@ func (m *mockExpenseRepo) Update(expense *models.Expense) error {
 // --- SummaryRepo mock ---
 
 type mockSummaryRepo struct {
-	total      int
-	tagTotals  []repositories.TagSummary
-	tagDetails []repositories.TagExpenseDetail
-	err        error
+	total             int
+	tagTotals         []repositories.TagSummary
+	tagTotalsWithDiff []repositories.TagSummaryWithDiff
+	tagDetails        []repositories.TagExpenseDetail
+	err               error
 }
 
 func (m *mockSummaryRepo) MonthTotal(year, month int) (int, error) {
@@ -109,6 +110,9 @@ func (m *mockSummaryRepo) MonthTotal(year, month int) (int, error) {
 }
 func (m *mockSummaryRepo) TagMonthTotals(year, month int) ([]repositories.TagSummary, error) {
 	return m.tagTotals, m.err
+}
+func (m *mockSummaryRepo) TagMonthTotalsWithDiff(year, month int) ([]repositories.TagSummaryWithDiff, error) {
+	return m.tagTotalsWithDiff, m.err
 }
 func (m *mockSummaryRepo) TagExpenseDetails(year, month, tagID int) ([]repositories.TagExpenseDetail, error) {
 	return m.tagDetails, m.err

@@ -113,6 +113,59 @@ func TestSummaryHandler_TagMonthTotals(t *testing.T) {
 	}
 }
 
+func TestSummaryHandler_TagMonthTotalsWithDiff(t *testing.T) {
+	tests := []struct {
+		name     string
+		query    string
+		repo     *mockSummaryRepo
+		wantCode int
+		wantBody string
+	}{
+		{
+			name:  "returns tag totals with diff",
+			query: "?year=2026&month=3",
+			repo: &mockSummaryRepo{tagTotalsWithDiff: []repositories.TagSummaryWithDiff{
+				{TagID: 1, Tag: "通勤", Total: 10000, PrevTotal: 8000, Diff: 2000},
+				{TagID: 2, Tag: "外食", Total: 5000, PrevTotal: 7000, Diff: -2000},
+			}},
+			wantCode: http.StatusOK,
+			wantBody: `[{"tag_id":1,"tag":"通勤","total":10000,"prev_total":8000,"diff":2000},{"tag_id":2,"tag":"外食","total":5000,"prev_total":7000,"diff":-2000}]`,
+		},
+		{
+			name:     "rejects missing params",
+			query:    "",
+			repo:     &mockSummaryRepo{},
+			wantCode: http.StatusBadRequest,
+		},
+		{
+			name:     "returns 500 on db error",
+			query:    "?year=2026&month=3",
+			repo:     &mockSummaryRepo{err: errDB},
+			wantCode: http.StatusInternalServerError,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			h := &SummaryHandler{Repo: tt.repo}
+			r := httptest.NewRequest(http.MethodGet, "/summary/tag/diff"+tt.query, nil)
+			w := httptest.NewRecorder()
+
+			h.TagMonthTotalsWithDiff(w, r)
+
+			if w.Code != tt.wantCode {
+				t.Errorf("status = %d, want %d", w.Code, tt.wantCode)
+			}
+			if tt.wantBody != "" {
+				got := strings.TrimSpace(w.Body.String())
+				if got != tt.wantBody {
+					t.Errorf("body = %s, want %s", got, tt.wantBody)
+				}
+			}
+		})
+	}
+}
+
 func TestSummaryHandler_TagExpenseDetails(t *testing.T) {
 	tests := []struct {
 		name     string

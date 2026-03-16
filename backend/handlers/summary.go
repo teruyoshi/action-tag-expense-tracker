@@ -39,6 +39,20 @@ func (h *SummaryHandler) TagMonthTotals(w http.ResponseWriter, r *http.Request) 
 	writeJSON(w, results)
 }
 
+func (h *SummaryHandler) TagMonthTotalsWithDiff(w http.ResponseWriter, r *http.Request) {
+	year, month, err := parseYearMonth(r)
+	if err != nil {
+		http.Error(w, "year and month query params required", http.StatusBadRequest)
+		return
+	}
+	results, err := h.Repo.TagMonthTotalsWithDiff(year, month)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	writeJSON(w, results)
+}
+
 func (h *SummaryHandler) TagExpenseDetails(w http.ResponseWriter, r *http.Request) {
 	year, month, err := parseYearMonth(r)
 	if err != nil {

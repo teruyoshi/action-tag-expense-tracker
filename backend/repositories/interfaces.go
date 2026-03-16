@@ -23,6 +23,7 @@ type ExpenseRepo interface {
 type SummaryRepo interface {
 	MonthTotal(year, month int) (int, error)
 	TagMonthTotals(year, month int) ([]TagSummary, error)
+	TagMonthTotalsWithDiff(year, month int) ([]TagSummaryWithDiff, error)
 	TagExpenseDetails(year, month, tagID int) ([]TagExpenseDetail, error)
 }
 

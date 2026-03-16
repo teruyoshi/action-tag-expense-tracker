@@ -13,7 +13,7 @@ vi.mock('react-router-dom', async () => {
 vi.mock('../api/client', () => ({
   api: {
     getMonthTotal: vi.fn(),
-    getTagTotals: vi.fn(),
+    getTagTotalsWithDiff: vi.fn(),
     getBalance: vi.fn(),
     updateBalance: vi.fn(),
   },
@@ -25,9 +25,9 @@ const mockApi = vi.mocked(api)
 beforeEach(() => {
   vi.clearAllMocks()
   mockApi.getMonthTotal.mockResolvedValue({ total: 15000 })
-  mockApi.getTagTotals.mockResolvedValue([
-    { tag_id: 1, tag: '通勤', total: 5000 },
-    { tag_id: 2, tag: '外食', total: 10000 },
+  mockApi.getTagTotalsWithDiff.mockResolvedValue([
+    { tag_id: 1, tag: '通勤', total: 5000, prev_total: 3000, diff: 2000 },
+    { tag_id: 2, tag: '外食', total: 10000, prev_total: 12000, diff: -2000 },
   ])
   mockApi.getBalance.mockResolvedValue({ id: 1, amount: 100000, updated_at: '' })
 })
@@ -65,7 +65,7 @@ describe('Home', () => {
   })
 
   it('タグデータがない場合は「データなし」を表示する', async () => {
-    mockApi.getTagTotals.mockResolvedValue([])
+    mockApi.getTagTotalsWithDiff.mockResolvedValue([])
     renderHome()
     await waitFor(() => {
       expect(screen.getByText('データなし')).toBeInTheDocument()
@@ -140,15 +140,15 @@ describe('Home', () => {
     mockApi.getMonthTotal
       .mockResolvedValueOnce({ total: 15000 })
       .mockResolvedValueOnce({ total: 35000 })
-    mockApi.getTagTotals
+    mockApi.getTagTotalsWithDiff
       .mockResolvedValueOnce([
-        { tag_id: 1, tag: '通勤', total: 5000 },
-        { tag_id: 2, tag: '外食', total: 10000 },
+        { tag_id: 1, tag: '通勤', total: 5000, prev_total: 3000, diff: 2000 },
+        { tag_id: 2, tag: '外食', total: 10000, prev_total: 12000, diff: -2000 },
       ])
       .mockResolvedValueOnce([
-        { tag_id: 1, tag: '通勤', total: 5000 },
-        { tag_id: 2, tag: '外食', total: 10000 },
-        { tag_id: 3, tag: 'その他', total: 20000 },
+        { tag_id: 1, tag: '通勤', total: 5000, prev_total: 3000, diff: 2000 },
+        { tag_id: 2, tag: '外食', total: 10000, prev_total: 12000, diff: -2000 },
+        { tag_id: 3, tag: 'その他', total: 20000, prev_total: 0, diff: 20000 },
       ])
     renderHome()
     const user = userEvent.setup()

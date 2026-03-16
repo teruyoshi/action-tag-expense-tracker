@@ -354,3 +354,21 @@ label {
   padding: 4px 8px;
   font-size: 0.8rem;
 }
+
+.diff {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 0.8rem;
+}
+
+.diff-increase {
+  color: #e53935;
+}
+
+.diff-decrease {
+  color: #2e7d32;
+}
+
+.diff-zero {
+  color: #999;
+}

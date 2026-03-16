@@ -157,6 +157,20 @@ describe('api.getTagTotals', () => {
   })
 })
 
+describe('api.getTagTotalsWithDiff', () => {
+  it('fetches tag summaries with diff', async () => {
+    const data = [{ tag_id: 1, tag: '通勤', total: 10000, prev_total: 8000, diff: 2000 }]
+    mockFetch.mockReturnValueOnce(jsonResponse(data))
+
+    const result = await api.getTagTotalsWithDiff(2026, 3)
+    expect(result).toEqual(data)
+    expect(mockFetch).toHaveBeenCalledWith(
+      'http://localhost:8080/summary/tag/diff?year=2026&month=3',
+      expect.any(Object),
+    )
+  })
+})
+
 describe('error handling', () => {
   it('throws error with response body on failure', async () => {
     mockFetch.mockReturnValueOnce(errorResponse(400, 'name is required'))

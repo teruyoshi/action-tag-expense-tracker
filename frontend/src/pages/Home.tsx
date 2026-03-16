@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
-import type { TagSummary } from '../api/client'
+import type { TagSummaryWithDiff } from '../api/client'
 import { MonthNav } from '../components/MonthNav'
 import { BalanceCard } from '../components/BalanceCard'
 import { TagSummaryCard } from '../components/TagSummaryCard'
@@ -12,12 +12,12 @@ export function Home() {
   const [year, setYear] = useState(now.getFullYear())
   const [month, setMonth] = useState(now.getMonth() + 1)
   const [total, setTotal] = useState(0)
-  const [tagTotals, setTagTotals] = useState<TagSummary[]>([])
+  const [tagTotals, setTagTotals] = useState<TagSummaryWithDiff[]>([])
   const [balance, setBalance] = useState(0)
 
   useEffect(() => {
     api.getMonthTotal(year, month).then((r) => setTotal(r.total))
-    api.getTagTotals(year, month).then(setTagTotals)
+    api.getTagTotalsWithDiff(year, month).then(setTagTotals)
   }, [year, month])
 
   useEffect(() => {
@@ -59,7 +59,7 @@ export function Home() {
         onBalanceUpdate={(amount) => {
           setBalance(amount)
           api.getMonthTotal(year, month).then((r) => setTotal(r.total))
-          api.getTagTotals(year, month).then(setTagTotals)
+          api.getTagTotalsWithDiff(year, month).then(setTagTotals)
         }}
       />
 
