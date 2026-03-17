@@ -217,11 +217,12 @@ infrastructure:
         image: mysql:8.0
         port: 3306
         database: expense_tracker
+        healthcheck: mysqladmin ping -h 127.0.0.1（TCP接続で初期化完了を確認）
       backend:
         build: ./backend
         port: 8080
         depends_on: db (healthy)
-        healthcheck: curl http://localhost:8080/balance
+        healthcheck: curl http://localhost:8080/balance（start_period: 60s）
       frontend:
         build: ./frontend
         port: 5173
