@@ -40,8 +40,8 @@ Featureは大きすぎてそのまま実装すると危険。
 
 プロジェクトルートに `repo_map.yaml` がある場合は読み込み、以下を把握する：
 - ディレクトリ構成
-- 既存モジュール
-- quick_lookup セクション（類似タスクの参照パス）
+- 既存モジュール（`backend.layers`、`frontend.pages` 等）
+- ドメインモデル（`domain.entities`）
 
 ### 3. Slice への分解
 

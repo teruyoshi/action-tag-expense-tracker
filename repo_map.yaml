@@ -1,5 +1,5 @@
 # repo_map.yaml - AI用コードベース地図
-# 最終更新: 2026-03-15
+# 最終更新: 2026-03-17
 
 project:
   name: action-tag-expense-tracker
@@ -221,10 +221,11 @@ infrastructure:
         build: ./backend
         port: 8080
         depends_on: db (healthy)
+        healthcheck: curl http://localhost:8080/balance
       frontend:
         build: ./frontend
         port: 5173
-        depends_on: backend
+        depends_on: backend (healthy)
       e2e:
         build: ./e2e
         profile: e2e

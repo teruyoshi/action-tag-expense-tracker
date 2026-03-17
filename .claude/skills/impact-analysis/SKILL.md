@@ -26,20 +26,16 @@ description: >
 - 何を変更するか（ファイル、関数、型など）
 - どう変更するか（追加、修正、削除）
 
-### 2. repo_map.yaml の影響分析ルール確認
+### 2. repo_map.yaml で影響範囲を確認
 
-`repo_map.yaml` の `impact_analysis_rules` セクションを確認：
+`repo_map.yaml` の構造を参照し、変更種別に応じた影響範囲を確認する：
 
-```yaml
-backend_changes:
-  check: [backend/services, backend/repositories, backend/handlers, backend/tests]
-database_changes:
-  check: [backend/models, backend/migrations, backend/repositories]
-api_changes:
-  check: [api/openapi.yaml, frontend/src/api, backend/handlers]
-frontend_changes:
-  check: [frontend/src/components, frontend/src/pages, e2e/playwright]
-```
+| 変更種別 | 確認すべきディレクトリ |
+|---|---|
+| Backend変更 | `backend/repositories`, `backend/handlers`, 各 `*_test.go` |
+| DB変更 | `backend/models`, `backend/migrations`, `backend/repositories` |
+| API変更 | `frontend/src/api`, `backend/handlers` |
+| Frontend変更 | `frontend/src/pages`, `frontend/src/components`, `e2e/tests` |
 
 ### 3. 依存関係の追跡
 

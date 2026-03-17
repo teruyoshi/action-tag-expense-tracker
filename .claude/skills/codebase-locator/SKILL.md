@@ -24,8 +24,9 @@ description: >
 
 プロジェクトルートの `repo_map.yaml` を最初に読む。
 特に以下のセクションを確認：
-- `directory_structure`: モジュール構成
-- `quick_lookup`: タスク別の参照先
+- `backend.layers`: handler / repository / models の構成
+- `frontend.pages` / `frontend.components`: ページとコンポーネントの構成
+- `infrastructure`: Docker Compose / CI / Makefile の構成
 
 ### 2. タスクの分類
 
@@ -33,11 +34,11 @@ description: >
 
 | タスク種別 | 主な対象ディレクトリ |
 |---|---|
-| APIエンドポイント追加 | `api/openapi.yaml`, `backend/handlers`, `backend/services`, `backend/repositories` |
+| APIエンドポイント追加 | `backend/handlers`, `backend/repositories`, `frontend/src/api` |
 | DBテーブル追加 | `backend/models`, `backend/migrations` |
 | フロントエンドページ追加 | `frontend/src/pages`, `frontend/src/components`, `frontend/src/api` |
-| ビジネスロジック変更 | `backend/services`, `backend/repositories` |
-| テスト追加 | `backend/tests`, `e2e/playwright` |
+| ビジネスロジック変更 | `backend/handlers`, `backend/repositories` |
+| テスト追加 | `backend/handlers/*_test.go`, `backend/repositories/*_test.go`, `frontend/src/**/*.test.*`, `e2e/tests` |
 
 ### 3. 既存パターンの調査
 
@@ -79,7 +80,7 @@ description: >
 - `Grep`: コード内容検索
 - `Read`: ファイル読み込み
 
-`repo_map.yaml` の `quick_lookup` セクションに該当するタスクがあれば、そこに記載されたパスから探索を開始する。
+`repo_map.yaml` の `backend.layers` や `frontend.pages` セクションに該当するタスクがあれば、そこに記載されたパスから探索を開始する。
 
 ## 注意
 

@@ -87,19 +87,14 @@ AIは以下を **実行する**：
 
 ## 検証
 
-コード生成後は必ず以下を実行する：
+コード生成後は必ず `make quick-check` を実行する：
 
 ```bash
-# Backend
-make lint
-make test
-
-# Frontend
-make lint-frontend
-make typecheck
+make quick-check   # fmt-check + fmt-check-frontend + lint + lint-frontend + typecheck
 ```
 
 エラーがあれば修正してから完了とする。
+テストの実行は `change-verifier` スキルが担当する。
 
 ## 注意
 

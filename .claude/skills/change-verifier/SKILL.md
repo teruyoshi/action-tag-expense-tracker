@@ -61,7 +61,7 @@ make check
 
 | 実行内容 | コマンド |
 |---|---|
-| quick-check 全項目 | fmt-check + lint + typecheck |
+| quick-check 全項目 | fmt-check + fmt-check-frontend + lint + lint-frontend + typecheck |
 | Backend テスト | `make test` |
 | Frontend テスト | `make test-frontend` |
 
@@ -78,7 +78,7 @@ make verify
 
 | 実行内容 | コマンド |
 |---|---|
-| check 全項目 | fmt-check + lint + typecheck + test |
+| check 全項目 | fmt-check + fmt-check-frontend + lint + lint-frontend + typecheck + test + test-frontend |
 | E2E テスト | `make e2e` |
 
 **いつ使うか:** 機能が完成し、マージ前の最終確認。

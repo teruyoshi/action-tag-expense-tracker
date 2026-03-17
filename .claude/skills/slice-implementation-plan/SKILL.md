@@ -63,11 +63,9 @@ description: >
 ### 5. 検証コマンド
 
 ```
-make lint
-make test
-make lint-frontend
-make typecheck
-make e2e  # E2E変更がある場合
+make quick-check   # 編集直後: fmt-check + fmt-check-frontend + lint + lint-frontend + typecheck
+make check         # 実装完了: quick-check + test + test-frontend
+make verify        # E2E変更がある場合: check + e2e
 ```
 
 ## 出力フォーマット
