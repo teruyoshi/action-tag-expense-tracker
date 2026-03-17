@@ -41,12 +41,14 @@ make quick-check
 
 | 実行内容 | コマンド |
 |---|---|
+| Backend フォーマットチェック | `make fmt-check` |
+| Frontend フォーマットチェック | `make fmt-check-frontend` |
 | Backend lint | `make lint` |
 | Frontend lint | `make lint-frontend` |
 | Frontend 型チェック | `make typecheck` |
 
 **いつ使うか:** ファイルを編集した直後。最も頻繁に使う。
-**目安:** 2〜10秒
+**目安:** 5〜15秒
 
 AIの開発ループでは、編集のたびにこれを回す。
 テストまで毎回実行すると速度が落ちるため、lint と型チェックのみで素早くフィードバックを得る。
@@ -59,7 +61,7 @@ make check
 
 | 実行内容 | コマンド |
 |---|---|
-| quick-check 全項目 | lint + lint-frontend + typecheck |
+| quick-check 全項目 | fmt-check + lint + typecheck |
 | Backend テスト | `make test` |
 | Frontend テスト | `make test-frontend` |
 
@@ -76,7 +78,7 @@ make verify
 
 | 実行内容 | コマンド |
 |---|---|
-| check 全項目 | lint + typecheck + test |
+| check 全項目 | fmt-check + lint + typecheck + test |
 | E2E テスト | `make e2e` |
 
 **いつ使うか:** 機能が完成し、マージ前の最終確認。
@@ -147,6 +149,8 @@ git diff --cached --name-only
 
 | チェック | 結果 | 詳細 |
 |---|---|---|
+| Backend Format | OK / NG | [詳細] |
+| Frontend Format | OK / NG | [詳細] |
 | Backend Lint | OK / NG | [詳細] |
 | Frontend Lint | OK / NG | [詳細] |
 | Frontend TypeCheck | OK / NG | [詳細] |

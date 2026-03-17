@@ -58,7 +58,7 @@ e2e:
 
 # ---------- AI CHECK ----------
 
-quick-check: lint lint-frontend typecheck
+quick-check: fmt-check fmt-check-frontend lint lint-frontend typecheck
 
 check: quick-check test test-frontend
 
