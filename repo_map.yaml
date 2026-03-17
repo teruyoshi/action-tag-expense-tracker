@@ -258,7 +258,7 @@ infrastructure:
       test-frontend: Frontend Vitest
       typecheck: Frontend tsc --noEmit
       e2e: Playwright テスト（Docker Compose e2e プロファイル）
-      quick-check: lint + lint-frontend + typecheck
+      quick-check: fmt-check + fmt-check-frontend + lint + lint-frontend + typecheck
       check: quick-check + test + test-frontend
       verify: check + e2e
       test-diff: 変更ファイルの影響テストのみ実行

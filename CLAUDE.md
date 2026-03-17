@@ -60,7 +60,7 @@ make fmt              # Backend フォーマット（gofmt）
 make fmt-frontend     # Frontend フォーマット（Prettier）
 
 # --- AI検証（3段階） ---
-make quick-check      # 編集直後: fmt-check + lint + typecheck
+make quick-check      # 編集直後: fmt-check + fmt-check-frontend + lint + lint-frontend + typecheck
 make check            # 実装完了: quick-check + test + test-frontend
 make verify           # 機能完成: check + e2e
 
