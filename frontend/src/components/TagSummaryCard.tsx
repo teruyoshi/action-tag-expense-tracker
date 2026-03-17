@@ -26,21 +26,21 @@ export function TagSummaryCard({ tagTotals, onTagDetail, year, month }: Props) {
       {tagTotals.length === 0 ? (
         <p className="empty">データなし</p>
       ) : (
-        <ul className="tag-list">
-          {tagTotals.map((t) => (
-            <li
-              key={t.tag}
-              className="tag-list-clickable"
-              onClick={() => onTagDetail({ tagId: t.tag_id, tagName: t.tag, year, month })}
-            >
-              <span>{t.tag}</span>
-              <span>
-                &yen;{t.total.toLocaleString()}
-                <span className={`diff ${diffClassName(t.diff)}`}>{formatDiff(t.diff)}</span>
-              </span>
-            </li>
-          ))}
-        </ul>
+        <table className="tag-summary-table">
+          <tbody>
+            {tagTotals.map((t) => (
+              <tr
+                key={t.tag}
+                className="tag-list-clickable"
+                onClick={() => onTagDetail({ tagId: t.tag_id, tagName: t.tag, year, month })}
+              >
+                <td>{t.tag}</td>
+                <td className="amount-col">&yen;{t.total.toLocaleString()}</td>
+                <td className={`diff ${diffClassName(t.diff)}`}>{formatDiff(t.diff)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       )}
     </div>
   )

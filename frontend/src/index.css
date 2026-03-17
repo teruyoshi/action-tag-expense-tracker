@@ -294,7 +294,8 @@ label {
   color: #666;
 }
 
-.amount-col {
+.amount-col,
+.detail-table .amount-col {
   text-align: right;
 }
 
@@ -355,10 +356,23 @@ label {
   font-size: 0.8rem;
 }
 
+.tag-summary-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tag-summary-table td {
+  padding: 8px 4px;
+  border-bottom: 1px solid #eee;
+}
+
+.tag-summary-table tr:last-child td {
+  border-bottom: none;
+}
+
 .diff {
-  display: inline-block;
-  margin-left: 8px;
   font-size: 0.8rem;
+  white-space: nowrap;
 }
 
 .diff-increase {
