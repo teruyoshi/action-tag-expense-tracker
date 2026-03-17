@@ -14,10 +14,10 @@ import (
 
 func TestActionTagHandler_List(t *testing.T) {
 	tests := []struct {
-		name       string
-		repo       *mockActionTagRepo
-		wantCode   int
-		wantBody   string
+		name     string
+		repo     *mockActionTagRepo
+		wantCode int
+		wantBody string
 	}{
 		{
 			name:     "returns tags",

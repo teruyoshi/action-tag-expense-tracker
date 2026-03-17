@@ -9,9 +9,9 @@ import (
 
 func TestBalanceRepository_Get(t *testing.T) {
 	tests := []struct {
-		name   string
-		setup  func(sqlmock.Sqlmock)
-		want   int
+		name  string
+		setup func(sqlmock.Sqlmock)
+		want  int
 	}{
 		{
 			name: "existing balance",

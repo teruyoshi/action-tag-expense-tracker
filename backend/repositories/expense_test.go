@@ -30,9 +30,9 @@ func TestExpenseRepository_Create(t *testing.T) {
 
 func TestExpenseRepository_Update(t *testing.T) {
 	tests := []struct {
-		name   string
+		name    string
 		expense *models.Expense
-		setup  func(sqlmock.Sqlmock)
+		setup   func(sqlmock.Sqlmock)
 	}{
 		{
 			name:    "updates only item and amount",

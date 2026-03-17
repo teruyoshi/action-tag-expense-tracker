@@ -71,4 +71,3 @@ func (h *SummaryHandler) TagExpenseDetails(w http.ResponseWriter, r *http.Reques
 	}
 	writeJSON(w, results)
 }
-
