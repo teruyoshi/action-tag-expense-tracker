@@ -1,5 +1,5 @@
 # repo_map.yaml - AI用コードベース地図
-# 最終更新: 2026-03-17
+# 最終更新: 2026-03-18
 
 project:
   name: action-tag-expense-tracker
@@ -227,10 +227,11 @@ infrastructure:
         build: ./frontend
         port: 5173
         depends_on: backend (healthy)
+        healthcheck: wget --spider http://localhost:5173（start_period: 30s）
       e2e:
         build: ./e2e
         profile: e2e
-        depends_on: frontend
+        depends_on: frontend (healthy)
 
   ci:
     file: .github/workflows/ci.yml
@@ -242,7 +243,7 @@ infrastructure:
     - file: frontend/Dockerfile
       base: node:24-alpine
     - file: e2e/Dockerfile
-      base: mcr.microsoft.com/playwright:v1.52.0-noble
+      base: mcr.microsoft.com/playwright:v1.58.2-noble
 
   makefile:
     file: Makefile
