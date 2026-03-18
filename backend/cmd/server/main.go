@@ -9,6 +9,7 @@ import (
 
 	"action-tag-expense-tracker/backend/handlers"
 	"action-tag-expense-tracker/backend/repositories"
+	"action-tag-expense-tracker/backend/services"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -44,11 +45,15 @@ func main() {
 	eventHandler := &handlers.EventHandler{Repo: eventRepo}
 	expenseHandler := &handlers.ExpenseHandler{Repo: expenseRepo, BalanceRepo: balanceRepo}
 	summaryHandler := &handlers.SummaryHandler{Repo: summaryRepo}
-	balanceHandler := &handlers.BalanceHandler{
-		Repo:          balanceRepo,
+	balanceService := &services.BalanceService{
+		BalanceRepo:   balanceRepo,
 		ActionTagRepo: tagRepo,
 		EventRepo:     eventRepo,
 		ExpenseRepo:   expenseRepo,
+	}
+	balanceHandler := &handlers.BalanceHandler{
+		Repo:    balanceRepo,
+		Service: balanceService,
 	}
 
 	r := chi.NewRouter()
