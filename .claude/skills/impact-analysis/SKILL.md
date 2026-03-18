@@ -52,10 +52,10 @@ description: >
 - コンポーネントの使用箇所
 
 **API**
-- OpenAPI定義の変更 → backend handler + frontend api client
+- backend handler の変更 → frontend api client
 
 **Database**
-- モデル変更 → repository → service → handler
+- モデル変更 → repository → handler（service が存在する場合は repository → service → handler）
 
 ### 4. リスク評価
 
@@ -71,6 +71,18 @@ description: >
 - 追加テストが必要か
 - E2Eテストへの影響
 
+## Service導入判定
+
+影響分析の結果、service 層が必要かを判定する。
+
+```
+## Service導入判定
+
+- 導入: YES / NO
+- 理由:
+- 対象:
+```
+
 ## 出力フォーマット
 
 ```
@@ -82,7 +94,7 @@ description: >
 
 | 影響を受けるファイル | 理由 | リスク |
 |---|---|---|
-| backend/services/xxx.go | 型変更の影響 | 高 |
+| backend/handlers/xxx.go | 型変更の影響 | 高 |
 | frontend/src/api/xxx.ts | API変更の影響 | 中 |
 
 ## リスクのある箇所
@@ -91,7 +103,7 @@ description: >
 
 ## 必要なテスト
 
-- [ ] backend/tests/xxx_test.go の更新
+- [ ] backend/handlers/xxx_test.go または backend/repositories/xxx_test.go の更新
 - [ ] e2e テストの追加
 ```
 

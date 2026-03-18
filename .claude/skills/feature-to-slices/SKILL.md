@@ -48,8 +48,8 @@ Featureは大きすぎてそのまま実装すると危険。
 Featureを以下の観点で分解する：
 
 - **データ層**: DBテーブル追加、マイグレーション
-- **ビジネスロジック層**: service、repository の追加・変更
-- **API層**: handler、OpenAPI定義の追加・変更
+- **ビジネスロジック層**: repository の追加・変更（必要な場合のみ service）
+- **API層**: handler の追加・変更
 - **フロントエンド層**: ページ、コンポーネント、API クライアント
 - **テスト層**: 各層のテスト追加
 - **E2E層**: Playwright テスト
@@ -57,12 +57,23 @@ Featureを以下の観点で分解する：
 ### 4. 依存関係の整理
 
 Slice間の依存関係を明確にする。
-例：DB変更 → repository → service → handler → frontend の順序。
+例：DB変更 → repository → handler → frontend の順序。
+（service が必要な場合のみ repository → service → handler）
 
 ### 5. 実装順序の提案
 
 依存関係に基づき、安全な実装順序を提案する。
 原則として **データ層から UI層へ** 向かう順序にする。
+
+## Service導入判定
+
+各Sliceで service 層が必要かを判定する。デフォルト構造は handler → repository。
+
+以下の場合のみ service を導入する：
+- 複数 repository をまたぐ処理
+- 副作用を伴う処理
+- トランザクションが必要な処理
+- 明確なユースケース単位の処理
 
 ## 出力フォーマット
 
@@ -71,6 +82,18 @@ Slice間の依存関係を明確にする。
 
 1. [Slice名] - [概要] (変更見込: 約XX行, X files)
 2. ...
+
+## 実装レイヤー
+
+- handlerのみ
+- handler + repository
+- handler + service（例外）
+
+## Service導入判定
+
+- 導入: YES / NO
+- 理由:
+- 対象:
 
 ## 依存関係
 
@@ -89,7 +112,6 @@ Slice 2 → Slice 4
 - Backend: Go / chi / GORM / golang-migrate
 - Frontend: React / TypeScript / Vite
 - DB: MySQL
-- API: OpenAPI
 - E2E: Playwright
 - コマンド: Make 経由（`make dev`, `make test`, `make lint`, `make e2e`）
 

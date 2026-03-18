@@ -24,7 +24,7 @@ description: >
 
 プロジェクトルートの `repo_map.yaml` を最初に読む。
 特に以下のセクションを確認：
-- `backend.layers`: handler / repository / models の構成
+- `backend.layers`: handler / repository / models の構成（デフォルト構造は handler → repository。services は存在しない場合がある）
 - `frontend.pages` / `frontend.components`: ページとコンポーネントの構成
 - `infrastructure`: Docker Compose / CI / Makefile の構成
 
@@ -37,7 +37,7 @@ description: >
 | APIエンドポイント追加 | `backend/handlers`, `backend/repositories`, `frontend/src/api` |
 | DBテーブル追加 | `backend/models`, `backend/migrations` |
 | フロントエンドページ追加 | `frontend/src/pages`, `frontend/src/components`, `frontend/src/api` |
-| ビジネスロジック変更 | `backend/handlers`, `backend/repositories` |
+| ビジネスロジック変更 | `backend/handlers`, `backend/repositories`（service が存在する場合は `backend/services` も） |
 | テスト追加 | `backend/handlers/*_test.go`, `backend/repositories/*_test.go`, `frontend/src/**/*.test.*`, `e2e/tests` |
 
 ### 3. 既存パターンの調査
@@ -61,17 +61,19 @@ description: >
 | ファイル | 目的 | 操作 |
 |---|---|---|
 | backend/handlers/xxx.go | HTTPハンドラ | 新規作成 |
-| backend/services/xxx.go | ビジネスロジック | 新規作成 |
+| backend/repositories/xxx.go | データアクセス | 新規作成 |
 
 ## 既存パターン
 
 - ハンドラの例: backend/handlers/existing.go
-- サービスの例: backend/services/existing.go
+- リポジトリの例: backend/repositories/existing.go
 
 ## 関連ファイル
 
-- backend/services/other.go (依存関係あり)
+- backend/repositories/other.go (依存関係あり)
 ```
+
+**注意:** services ディレクトリはデフォルトでは存在しない。repo_map.yaml に記載がある場合のみ候補に含める。
 
 ## 探索ツール
 

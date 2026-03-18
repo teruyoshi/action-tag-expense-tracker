@@ -31,7 +31,7 @@ make verify
 理由: Docker / npm / go / playwright の差異を Make が吸収している。
 直接実行すると環境差異でCI結果と一致しなくなる。
 
-## 3段階の検証フロー
+## 4段階の検証フロー
 
 ### レベル1: quick-check（編集直後）
 
@@ -70,7 +70,25 @@ make check
 
 quick-check を内包しているため、別途 quick-check を実行する必要はない。
 
-### レベル3: verify（機能完成時）
+### レベル3: security-check（実装完了時）
+
+```bash
+make security-check
+```
+
+| 実行内容 | コマンド |
+|---|---|
+| Backend 脆弱性チェック | `make vuln-backend` |
+| Frontend 脆弱性チェック | `make vuln-frontend` |
+| Backend 静的セキュリティ解析 | `make sec-backend` |
+| シークレット漏洩検出 | `make sec-secrets` |
+
+**いつ使うか:** 実装完了時、check と合わせて実行する。PR前は必須。
+**目安:** 10〜30秒
+
+**security-check はスキップ禁止。** PR前には必ず実行すること。
+
+### レベル4: verify（機能完成時）
 
 ```bash
 make verify
@@ -100,14 +118,15 @@ make test-diff
 ## AI開発ループ
 
 ```
-編集 → quick-check → 編集 → quick-check → ... → check → verify
+編集 → quick-check → 編集 → quick-check → ... → check → security-check → verify
 ```
 
 このループが AIDD の速度の核心。具体的には：
 
 1. **編集中:** `make quick-check` を繰り返す
 2. **実装完了:** `make check`（または `make test-diff` で影響テストのみ）
-3. **機能完成:** `make verify`（E2E含む完全検証）
+3. **実装完了:** `make security-check`（脆弱性 + SAST + シークレット検出）
+4. **機能完成:** `make verify`（E2E含む完全検証）
 
 ## 手順
 
@@ -127,6 +146,7 @@ git diff --cached --name-only
 | ファイルを1〜2個編集した直後 | `make quick-check` |
 | 差分に対するテストだけ確認したい | `make test-diff` |
 | まとまった実装が完了した | `make check` |
+| 実装完了、PR前 | `make security-check` |
 | 機能完成、マージ前 | `make verify` |
 | プロジェクト構造に不安がある | `make doctor` |
 
@@ -145,7 +165,14 @@ git diff --cached --name-only
 ## 出力フォーマット
 
 ```
-## 検証結果（レベル: quick-check / check / verify）
+## 検証結果
+
+- quick-check: OK / NG
+- check: OK / NG
+- security-check: OK / NG
+- verify: OK / NG
+
+### 詳細
 
 | チェック | 結果 | 詳細 |
 |---|---|---|
@@ -156,6 +183,7 @@ git diff --cached --name-only
 | Frontend TypeCheck | OK / NG | [詳細] |
 | Backend Test | OK / NG / SKIP | [詳細] |
 | Frontend Test | OK / NG / SKIP | [詳細] |
+| Security Check | OK / NG / SKIP | [詳細] |
 | E2E | OK / NG / SKIP | [詳細] |
 
 ## 問題点

@@ -45,14 +45,14 @@ description: >
 
 1. **DB変更**（マイグレーション、モデル）
 2. **Repository**（データアクセス）
-3. **Service**（ビジネスロジック）
+3. **Service**（必要な場合のみ — 複数repositoryをまたぐ処理、副作用、トランザクション等）
 4. **Handler**（APIエンドポイント）
-5. **OpenAPI**（API仕様更新）
-6. **Frontend API Client**（API呼び出し）
-7. **Frontend UI**（ページ、コンポーネント）
-8. **テスト**（各層のテスト）
+5. **Frontend API Client**（API呼び出し）
+6. **Frontend UI**（ページ、コンポーネント）
+7. **テスト**（各層のテスト）
 
-全ての層に変更がない場合はスキップする。
+デフォルト構造は handler → repository。Service は必要な場合のみ導入する。
+変更がない層はスキップする。
 
 ### 4. テスト計画
 
@@ -60,12 +60,23 @@ description: >
 - どのテストを修正するか
 - E2Eテストが必要か
 
-### 5. 検証コマンド
+### 5. Service導入判定
 
 ```
-make quick-check   # 編集直後: fmt-check + fmt-check-frontend + lint + lint-frontend + typecheck
-make check         # 実装完了: quick-check + test + test-frontend
-make verify        # E2E変更がある場合: check + e2e
+## Service導入判定
+
+- 導入: YES / NO
+- 理由:
+- 対象:
+```
+
+### 6. 検証コマンド
+
+```
+make quick-check      # 編集直後: fmt-check + fmt-check-frontend + lint + lint-frontend + typecheck
+make check            # 実装完了: quick-check + test + test-frontend
+make security-check   # 実装完了: 脆弱性 + SAST + シークレット検出
+make verify           # E2E変更がある場合: check + e2e
 ```
 
 ## 出力フォーマット
@@ -84,14 +95,21 @@ make verify        # E2E変更がある場合: check + e2e
 | 2 | backend/models/xxx.go | 新規 | モデル定義 |
 | 3 | backend/repositories/xxx.go | 新規 | CRUD操作 |
 
+### Service導入判定
+
+- 導入: YES / NO
+- 理由:
+- 対象:
+
 ### テスト計画
 
-- [ ] backend/tests/xxx_test.go: [テスト内容]
-- [ ] e2e/playwright/xxx.spec.ts: [テスト内容]
+- [ ] backend/handlers/xxx_test.go: [テスト内容]
+- [ ] backend/repositories/xxx_test.go: [テスト内容]
+- [ ] e2e/tests/xxx.spec.ts: [テスト内容]
 
 ### 検証コマンド
 
-make lint && make test
+make quick-check → make check → make security-check → make verify
 ```
 
 ## 注意

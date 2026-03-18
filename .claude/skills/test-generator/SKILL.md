@@ -16,7 +16,7 @@ description: >
 
 | 層 | ツール | 対象 | 実行 |
 |---|---|---|---|
-| Backend Unit | `go test` | services, repositories, handlers | `make test` |
+| Backend Unit | `go test` | handlers, repositories（services がある場合は services も） | `make test` |
 | Frontend Unit | Vitest | components, hooks, utils | `make test-frontend` |
 | E2E | Playwright | ユーザーフロー全体 | `make e2e` |
 
@@ -117,8 +117,9 @@ test('ユーザーが○○できる', async ({ page }) => {
 
 | テストファイル | テスト内容 | 種別 |
 |---|---|---|
-| backend/tests/xxx_test.go | [内容] | unit |
-| e2e/playwright/xxx.spec.ts | [内容] | e2e |
+| backend/handlers/xxx_test.go | [内容] | unit |
+| backend/repositories/xxx_test.go | [内容] | unit |
+| e2e/tests/xxx.spec.ts | [内容] | e2e |
 
 ## エッジケース
 
@@ -135,6 +136,19 @@ make test          # Backend
 make test-frontend # Frontend
 make e2e           # E2E（変更がある場合）
 ```
+
+## テスト配置ルール
+
+テストファイルは対象コードと同じディレクトリに置く（co-located）：
+
+```
+backend/handlers/xxx.go      → backend/handlers/xxx_test.go
+backend/repositories/xxx.go  → backend/repositories/xxx_test.go
+backend/services/xxx.go      → backend/services/xxx_test.go（存在する場合のみ）
+```
+
+service がない場合は handler テスト + repository テストのみ。
+service がある場合は service 単体テストも追加する。
 
 ## 注意
 
