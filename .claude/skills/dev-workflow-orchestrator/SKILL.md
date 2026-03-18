@@ -3,8 +3,11 @@ name: dev-workflow-orchestrator
 description: >
   開発ワークフロー全体を統括し、各スキルを正しい順序で実行する。
   「機能を開発したい」「この機能を作って」「開発を始めたい」「ワークフローを開始して」
+  「指示書に従って実装して」「この計画で進めて」「このSliceを実装して」「〜を導入して」
   などの場面で使う。Feature開発の全体フローを管理するオーケストレーターとして、
   常にこのスキルを通じて開発を進めること。
+  指示書や実装計画が添付されている場合も例外にしない。
+  除外: repo_map更新、ドキュメント修正、設定変更など非機能タスク。
 ---
 
 # Dev Workflow Orchestrator
@@ -37,7 +40,7 @@ feature-to-slices      ← Feature を Slice に分解
 │    ↓                                                       │
 │  test-generator       ← テスト生成                          │
 │    ↓                                                       │
-│  change-verifier      ← 検証（lint, test, typecheck）       │
+│  change-verifier      ← 検証（lint, test, typecheck, security） │
 │    ↓                                                       │
 │  自動レビュー → レポート提出                                  │
 │    ↓                                                       │
@@ -99,7 +102,16 @@ feature-to-slices      ← Feature を Slice に分解
 #### Step 6: 検証
 
 `change-verifier` を実行し、全チェックを通す。
-問題があれば修正し、再検証する。
+
+検証フローは以下の順序で行う：
+
+```
+make quick-check → make check → make security-check → make verify
+```
+
+- `security-check` はスキップ禁止。PR前には必ず実行すること
+- main相当では `make security-check-full` を考慮する
+- 問題があれば修正し、再検証する
 
 #### Step 7: 自動レビュー
 
@@ -179,14 +191,15 @@ AIは **これらの承認なしに次のフェーズに進まない**。
 ## コマンド参照
 
 ```bash
-make dev           # 開発環境起動（Docker Compose）
-make lint          # Backend lint
-make test          # Backend テスト
-make lint-frontend # Frontend lint
-make typecheck     # Frontend 型チェック
-make test-frontend # Frontend テスト
-make e2e           # E2E テスト
-make quick-check   # 編集直後の検証
-make check         # 実装完了時の検証
-make verify        # マージ前の最終検証
+make dev              # 開発環境起動（Docker Compose）
+make lint             # Backend lint
+make test             # Backend テスト
+make lint-frontend    # Frontend lint
+make typecheck        # Frontend 型チェック
+make test-frontend    # Frontend テスト
+make e2e              # E2E テスト
+make quick-check      # 編集直後の検証
+make check            # 実装完了時の検証
+make security-check   # 実装完了時のセキュリティ検証（スキップ禁止）
+make verify           # マージ前の最終検証
 ```
