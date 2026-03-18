@@ -5,6 +5,7 @@ import type { TagSummaryWithDiff } from '../api/client'
 import { MonthNav } from '../components/MonthNav'
 import { BalanceCard } from '../components/BalanceCard'
 import { TagSummaryCard } from '../components/TagSummaryCard'
+import { useBalance } from '../hooks/useBalance'
 
 export function Home() {
   const navigate = useNavigate()
@@ -13,16 +14,12 @@ export function Home() {
   const [month, setMonth] = useState(now.getMonth() + 1)
   const [total, setTotal] = useState(0)
   const [tagTotals, setTagTotals] = useState<TagSummaryWithDiff[]>([])
-  const [balance, setBalance] = useState(0)
+  const { balance, updateBalance } = useBalance()
 
   useEffect(() => {
     api.getMonthTotal(year, month).then((r) => setTotal(r.total))
     api.getTagTotalsWithDiff(year, month).then(setTagTotals)
   }, [year, month])
-
-  useEffect(() => {
-    api.getBalance().then((b) => setBalance(b.amount))
-  }, [])
 
   const changeMonth = (delta: number) => {
     let m = month + delta
@@ -56,8 +53,8 @@ export function Home() {
 
       <BalanceCard
         balance={balance}
-        onBalanceUpdate={(amount) => {
-          setBalance(amount)
+        onBalanceUpdate={async (amount) => {
+          await updateBalance(amount)
           api.getMonthTotal(year, month).then((r) => setTotal(r.total))
           api.getTagTotalsWithDiff(year, month).then(setTagTotals)
         }}

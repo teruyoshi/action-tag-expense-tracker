@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { api } from '../api/client'
 import type { ActionTag } from '../api/client'
+import { useExpenses } from '../hooks/useExpenses'
 
 interface ExpenseRow {
   item: string
@@ -12,6 +12,7 @@ export function ExpenseInput() {
   const navigate = useNavigate()
   const location = useLocation()
   const tag = (location.state as { tag: ActionTag } | null)?.tag
+  const { createEventWithExpenses } = useExpenses()
 
   const today = new Date().toISOString().split('T')[0]
   const [date, setDate] = useState(today)
@@ -41,10 +42,11 @@ export function ExpenseInput() {
 
     setSaving(true)
     try {
-      const event = await api.createEvent(date, tag.id)
-      for (const row of validRows) {
-        await api.createExpense(event.id, row.item, Number(row.amount))
-      }
+      await createEventWithExpenses(
+        date,
+        tag.id,
+        validRows.map((r) => ({ item: r.item, amount: Number(r.amount) })),
+      )
       navigate('/')
     } catch (e) {
       alert('保存に失敗しました: ' + (e as Error).message)

@@ -164,7 +164,7 @@ frontend:
   api_client:
     file: frontend/src/api/client.ts
     description: fetch ベースのAPIクライアント。型定義（ActionTag, Event, Expense, TagSummary, TagSummaryWithDiff, TagExpenseDetail, Balance）も含む
-    base_url: http://localhost:8080
+    base_url: 相対パス（Viteプロキシ経由でbackendに転送）
 
   assets:
     description: 静的アセット（画像・SVG）
@@ -198,8 +198,14 @@ frontend:
       - frontend/src/components/TagSummaryCard.tsx    # 支出理由別サマリー表示
       - frontend/src/components/TagSummaryCard.test.tsx # TagSummaryCardのテスト
 
+  hooks:
+    description: カスタムhooks（API呼び出しのロジック分離）
+    files:
+      - frontend/src/hooks/useBalance.ts    # 所持金の取得・更新
+      - frontend/src/hooks/useTags.ts       # タグのCRUD操作
+      - frontend/src/hooks/useExpenses.ts   # 支出の作成・更新
+
   notes:
-    - hooks/ はまだ存在しない
     - utils/ はまだ存在しない
 
 # ──────────────────────────────────────
@@ -210,7 +216,9 @@ e2e:
   config: e2e/playwright.config.ts
   base_url: http://frontend:5173  # Docker Compose内のサービス名
   test_files:
-    - e2e/tests/home.spec.ts  # トップページの表示・画面遷移テスト
+    - e2e/tests/home.spec.ts           # トップページの表示・画面遷移テスト
+    - e2e/tests/expense-flow.spec.ts   # タグ作成→支出入力→保存フローテスト
+    - e2e/tests/balance.spec.ts        # 所持金更新フローテスト
 
 # ──────────────────────────────────────
 # インフラ
@@ -290,8 +298,8 @@ infrastructure:
 gaps:
   - "services層: BalanceServiceのみ存在。他のhandlerはrepository直接呼び出し"
   - "Backendテスト: handler層・repository層ともに全テスト済み"
-  - "E2Eテスト: Playwright設定済み。Home画面のみ。他画面のテストなし"
+  - "E2Eテスト: Playwright設定済み。Home・支出入力フロー・Balance更新のテストあり"
   - "OpenAPI仕様: api/openapi.yaml が存在しない"
-  - "カスタムhooks: hooks/ が空"
+  - "カスタムhooks: useBalance, useTags, useExpenses の3つ"
   - "エラーハンドリング: Frontend側のエラー表示が alert のみ"
   - "セキュリティ: govulncheck・gosec・npm audit・gitleaks・trivy導入済み。Semgrep・OWASP ZAPは未導入"

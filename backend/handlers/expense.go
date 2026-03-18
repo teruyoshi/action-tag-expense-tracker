@@ -19,20 +19,20 @@ type ExpenseHandler struct {
 func (h *ExpenseHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var expense models.Expense
 	if err := json.NewDecoder(r.Body).Decode(&expense); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 	if expense.Amount <= 0 || expense.EventID == 0 {
-		http.Error(w, "event_id and positive amount are required", http.StatusBadRequest)
+		writeError(w, http.StatusBadRequest, "event_id and positive amount are required")
 		return
 	}
 	if err := h.Repo.Create(&expense); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		writeError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 	if h.BalanceRepo != nil {
 		if err := h.BalanceRepo.Subtract(expense.Amount); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			writeError(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 	}
@@ -43,7 +43,7 @@ func (h *ExpenseHandler) Create(w http.ResponseWriter, r *http.Request) {
 func (h *ExpenseHandler) Update(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil || id < 1 {
-		http.Error(w, "invalid id", http.StatusBadRequest)
+		writeError(w, http.StatusBadRequest, "invalid id")
 		return
 	}
 	var input struct {
@@ -51,11 +51,11 @@ func (h *ExpenseHandler) Update(w http.ResponseWriter, r *http.Request) {
 		Amount int    `json:"amount"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 	if input.Amount <= 0 {
-		http.Error(w, "positive amount is required", http.StatusBadRequest)
+		writeError(w, http.StatusBadRequest, "positive amount is required")
 		return
 	}
 	expense := &models.Expense{
@@ -64,7 +64,7 @@ func (h *ExpenseHandler) Update(w http.ResponseWriter, r *http.Request) {
 		Amount: input.Amount,
 	}
 	if err := h.Repo.Update(expense); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		writeError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 	writeJSON(w, expense)

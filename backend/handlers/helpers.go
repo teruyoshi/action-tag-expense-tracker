@@ -15,6 +15,14 @@ func writeJSON(w http.ResponseWriter, data any) {
 	}
 }
 
+func writeError(w http.ResponseWriter, code int, message string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	if err := json.NewEncoder(w).Encode(map[string]string{"error": message}); err != nil {
+		log.Printf("writeError: %v", err)
+	}
+}
+
 func parseDate(s string) (time.Time, error) {
 	return time.Parse("2006-01-02", s)
 }

@@ -1,9 +1,8 @@
 import { useState } from 'react'
-import { api } from '../api/client'
 
 interface Props {
   balance: number
-  onBalanceUpdate: (amount: number) => void
+  onBalanceUpdate: (amount: number) => Promise<void>
 }
 
 export function BalanceCard({ balance, onBalanceUpdate }: Props) {
@@ -18,8 +17,7 @@ export function BalanceCard({ balance, onBalanceUpdate }: Props) {
   const handleSubmit = () => {
     const amount = parseInt(balanceInput, 10)
     if (isNaN(amount)) return
-    api.updateBalance(amount).then((b) => {
-      onBalanceUpdate(b.amount)
+    onBalanceUpdate(amount).then(() => {
       setShowModal(false)
       setBalanceInput('')
     })

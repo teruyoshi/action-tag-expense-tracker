@@ -3,15 +3,6 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { BalanceCard } from './BalanceCard'
 
-vi.mock('../api/client', () => ({
-  api: {
-    updateBalance: vi.fn(),
-  },
-}))
-
-import { api } from '../api/client'
-const mockApi = vi.mocked(api)
-
 beforeEach(() => {
   vi.clearAllMocks()
 })
@@ -30,8 +21,7 @@ describe('BalanceCard', () => {
   })
 
   it('モーダルで金額を更新できる', async () => {
-    mockApi.updateBalance.mockResolvedValue({ id: 1, amount: 50000, updated_at: '' })
-    const onBalanceUpdate = vi.fn()
+    const onBalanceUpdate = vi.fn().mockResolvedValue(undefined)
     render(<BalanceCard balance={100000} onBalanceUpdate={onBalanceUpdate} />)
     const user = userEvent.setup()
 
@@ -41,9 +31,9 @@ describe('BalanceCard', () => {
     await user.type(input, '50000')
     await user.click(screen.getByText('保存'))
 
-    expect(mockApi.updateBalance).toHaveBeenCalledWith(50000)
+    expect(onBalanceUpdate).toHaveBeenCalledWith(50000)
     await waitFor(() => {
-      expect(onBalanceUpdate).toHaveBeenCalledWith(50000)
+      expect(screen.queryByText('所持金を設定')).not.toBeInTheDocument()
     })
   })
 

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { api } from '../api/client'
 import type { TagExpenseDetail } from '../api/client'
+import { useExpenses } from '../hooks/useExpenses'
 
 export function TagDetails() {
   const navigate = useNavigate()
@@ -11,6 +12,7 @@ export function TagDetails() {
   const year = Number(searchParams.get('year'))
   const month = Number(searchParams.get('month'))
 
+  const { updateExpense } = useExpenses()
   const [details, setDetails] = useState<TagExpenseDetail[]>([])
   const [editingId, setEditingId] = useState<number | null>(null)
   const [editItem, setEditItem] = useState('')
@@ -61,7 +63,7 @@ export function TagDetails() {
       return
     }
     try {
-      await api.updateExpense(editingId, editItem, amount)
+      await updateExpense(editingId, editItem, amount)
       setDetails((prev) =>
         prev.map((d) => (d.id === editingId ? { ...d, item: editItem, amount } : d)),
       )

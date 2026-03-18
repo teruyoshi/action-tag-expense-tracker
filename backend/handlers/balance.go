@@ -16,7 +16,7 @@ type BalanceHandler struct {
 func (h *BalanceHandler) Get(w http.ResponseWriter, r *http.Request) {
 	balance, err := h.Repo.Get()
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		writeError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 	writeJSON(w, balance)
@@ -27,13 +27,13 @@ func (h *BalanceHandler) Update(w http.ResponseWriter, r *http.Request) {
 		Amount int `json:"amount"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	balance, err := h.Service.Update(input.Amount)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		writeError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 

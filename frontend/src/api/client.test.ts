@@ -45,7 +45,7 @@ describe('api.getTags', () => {
     const result = await api.getTags()
     expect(result).toEqual(tags)
     expect(mockFetch).toHaveBeenCalledWith(
-      'http://localhost:8080/tags',
+      '/tags',
       expect.objectContaining({ headers: { 'Content-Type': 'application/json' } }),
     )
   })
@@ -59,7 +59,7 @@ describe('api.createTag', () => {
     const result = await api.createTag('外食')
     expect(result).toEqual(tag)
     expect(mockFetch).toHaveBeenCalledWith(
-      'http://localhost:8080/tags',
+      '/tags',
       expect.objectContaining({
         method: 'POST',
         body: JSON.stringify({ name: '外食' }),
@@ -76,7 +76,7 @@ describe('api.updateTag', () => {
     const result = await api.updateTag(1, '買い物')
     expect(result).toEqual(tag)
     expect(mockFetch).toHaveBeenCalledWith(
-      'http://localhost:8080/tags/1',
+      '/tags/1',
       expect.objectContaining({
         method: 'PUT',
         body: JSON.stringify({ name: '買い物' }),
@@ -91,10 +91,7 @@ describe('api.deleteTag', () => {
 
     const result = await api.deleteTag(1)
     expect(result).toBeUndefined()
-    expect(mockFetch).toHaveBeenCalledWith(
-      'http://localhost:8080/tags/1',
-      expect.objectContaining({ method: 'DELETE' }),
-    )
+    expect(mockFetch).toHaveBeenCalledWith('/tags/1', expect.objectContaining({ method: 'DELETE' }))
   })
 })
 
@@ -106,7 +103,7 @@ describe('api.createEvent', () => {
     const result = await api.createEvent('2026-03-14', 2)
     expect(result).toEqual(event)
     expect(mockFetch).toHaveBeenCalledWith(
-      'http://localhost:8080/events',
+      '/events',
       expect.objectContaining({
         method: 'POST',
         body: JSON.stringify({ date: '2026-03-14', action_tag_id: 2 }),
@@ -140,10 +137,7 @@ describe('api.getMonthTotal', () => {
 
     const result = await api.getMonthTotal(2026, 3)
     expect(result).toEqual({ total: 15000 })
-    expect(mockFetch).toHaveBeenCalledWith(
-      'http://localhost:8080/summary/month?year=2026&month=3',
-      expect.any(Object),
-    )
+    expect(mockFetch).toHaveBeenCalledWith('/summary/month?year=2026&month=3', expect.any(Object))
   })
 })
 
@@ -165,7 +159,7 @@ describe('api.getTagTotalsWithDiff', () => {
     const result = await api.getTagTotalsWithDiff(2026, 3)
     expect(result).toEqual(data)
     expect(mockFetch).toHaveBeenCalledWith(
-      'http://localhost:8080/summary/tag/diff?year=2026&month=3',
+      '/summary/tag/diff?year=2026&month=3',
       expect.any(Object),
     )
   })
@@ -174,6 +168,19 @@ describe('api.getTagTotalsWithDiff', () => {
 describe('error handling', () => {
   it('throws error with response body on failure', async () => {
     mockFetch.mockReturnValueOnce(errorResponse(400, 'name is required'))
+
+    await expect(api.createTag('')).rejects.toThrow('name is required')
+  })
+
+  it('extracts error field from JSON error response', async () => {
+    mockFetch.mockReturnValueOnce(
+      Promise.resolve({
+        ok: false,
+        status: 400,
+        statusText: 'Bad Request',
+        text: () => Promise.resolve('{"error":"name is required"}'),
+      }),
+    )
 
     await expect(api.createTag('')).rejects.toThrow('name is required')
   })

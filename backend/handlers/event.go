@@ -20,13 +20,13 @@ type CreateEventRequest struct {
 func (h *EventHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var req CreateEventRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	date, err := parseDate(req.Date)
 	if err != nil {
-		http.Error(w, "invalid date format, use YYYY-MM-DD", http.StatusBadRequest)
+		writeError(w, http.StatusBadRequest, "invalid date format, use YYYY-MM-DD")
 		return
 	}
 
@@ -35,7 +35,7 @@ func (h *EventHandler) Create(w http.ResponseWriter, r *http.Request) {
 		ActionTagID: req.ActionTagID,
 	}
 	if err := h.Repo.Create(&event); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		writeError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 	w.WriteHeader(http.StatusCreated)

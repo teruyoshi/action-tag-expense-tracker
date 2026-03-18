@@ -1,19 +1,13 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { api } from '../api/client'
 import type { ActionTag } from '../api/client'
+import { useTags } from '../hooks/useTags'
 
 export function TagSelect() {
   const navigate = useNavigate()
-  const [tags, setTags] = useState<ActionTag[]>([])
+  const { tags, createTag } = useTags()
   const [showNew, setShowNew] = useState(false)
   const [newName, setNewName] = useState('')
-
-  const load = () => api.getTags().then(setTags)
-
-  useEffect(() => {
-    load()
-  }, [])
 
   const handleSelect = (tag: ActionTag) => {
     navigate('/expense/new', { state: { tag } })
@@ -22,10 +16,9 @@ export function TagSelect() {
   const handleCreate = async () => {
     if (!newName.trim()) return
     try {
-      const tag = await api.createTag(newName.trim())
+      const tag = await createTag(newName.trim())
       setNewName('')
       setShowNew(false)
-      await load()
       handleSelect(tag)
     } catch {
       alert('タグの作成に失敗しました')

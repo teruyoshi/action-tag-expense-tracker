@@ -1,39 +1,29 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { api } from '../api/client'
-import type { ActionTag } from '../api/client'
+import { useTags } from '../hooks/useTags'
 
 export function TagManage() {
   const navigate = useNavigate()
-  const [tags, setTags] = useState<ActionTag[]>([])
+  const { tags, createTag, updateTag, deleteTag } = useTags()
   const [newName, setNewName] = useState('')
   const [editingId, setEditingId] = useState<number | null>(null)
   const [editName, setEditName] = useState('')
 
-  const load = () => api.getTags().then(setTags)
-
-  useEffect(() => {
-    load()
-  }, [])
-
   const handleCreate = async () => {
     if (!newName.trim()) return
-    await api.createTag(newName.trim())
+    await createTag(newName.trim())
     setNewName('')
-    load()
   }
 
   const handleUpdate = async (id: number) => {
     if (!editName.trim()) return
-    await api.updateTag(id, editName.trim())
+    await updateTag(id, editName.trim())
     setEditingId(null)
-    load()
   }
 
   const handleDelete = async (id: number) => {
     if (!confirm('削除しますか？')) return
-    await api.deleteTag(id)
-    load()
+    await deleteTag(id)
   }
 
   return (

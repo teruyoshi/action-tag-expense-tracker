@@ -56,6 +56,55 @@ func TestWriteJSON(t *testing.T) {
 	}
 }
 
+func TestWriteError(t *testing.T) {
+	tests := []struct {
+		name     string
+		code     int
+		message  string
+		wantCode int
+		wantBody string
+	}{
+		{
+			name:     "bad request",
+			code:     http.StatusBadRequest,
+			message:  "name is required",
+			wantCode: 400,
+			wantBody: "{\"error\":\"name is required\"}\n",
+		},
+		{
+			name:     "not found",
+			code:     http.StatusNotFound,
+			message:  "tag not found",
+			wantCode: 404,
+			wantBody: "{\"error\":\"tag not found\"}\n",
+		},
+		{
+			name:     "internal server error",
+			code:     http.StatusInternalServerError,
+			message:  "unexpected error",
+			wantCode: 500,
+			wantBody: "{\"error\":\"unexpected error\"}\n",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			w := httptest.NewRecorder()
+			writeError(w, tt.code, tt.message)
+
+			if ct := w.Header().Get("Content-Type"); ct != "application/json" {
+				t.Errorf("Content-Type = %q, want %q", ct, "application/json")
+			}
+			if w.Code != tt.wantCode {
+				t.Errorf("status code = %d, want %d", w.Code, tt.wantCode)
+			}
+			if got := w.Body.String(); got != tt.wantBody {
+				t.Errorf("body = %q, want %q", got, tt.wantBody)
+			}
+		})
+	}
+}
+
 func TestParseDate(t *testing.T) {
 	tests := []struct {
 		name    string

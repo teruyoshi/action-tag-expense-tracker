@@ -10,5 +10,12 @@ export default defineConfig({
     watch: {
       usePolling: true,
     },
+    proxy: {
+      '/tags': 'http://backend:8080',
+      '/events': 'http://backend:8080',
+      '/expenses': 'http://backend:8080',
+      '/summary': 'http://backend:8080',
+      '/balance': 'http://backend:8080',
+    },
   },
 })
