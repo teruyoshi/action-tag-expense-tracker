@@ -26,6 +26,7 @@ repo/
 ├── backend/
 │   ├── cmd/server/main.go    # エントリーポイント
 │   ├── handlers/             # HTTPハンドラ
+│   ├── services/             # ビジネスロジック
 │   ├── repositories/         # DBアクセス
 │   ├── models/               # DBモデル
 │   ├── migrations/           # DBマイグレーション

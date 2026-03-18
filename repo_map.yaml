@@ -82,6 +82,12 @@ backend:
         - backend/repositories/summary_test.go     # SummaryRepository の単体テスト（TagMonthTotalsWithDiff含む）
         - backend/repositories/balance_test.go     # BalanceRepository の単体テスト
 
+    services:
+      description: ビジネスロジック層。複数リポジトリを組み合わせた処理
+      files:
+        - backend/services/balance.go       # BalanceService: Update（残高更新＋減額時の支出自動作成）
+        - backend/services/balance_test.go  # BalanceService の単体テスト
+
     models:
       description: GORMモデル定義
       files:
@@ -103,9 +109,9 @@ backend:
     - method: PUT     path: /balance           handler: BalanceHandler.Update
 
   notes:
-    - services層はまだ存在しない（handler → repository の直接呼び出し）
+    - services層はBalanceServiceのみ存在。他のhandlerはrepository直接呼び出し
     - repositoryインターフェースが定義済み（interfaces.go）
-    - Backend単体テストあり（全handler + helpers + 全repository）。handler層はモックリポジトリ、repository層はgo-sqlmockによるテスト
+    - Backend単体テストあり（全handler + helpers + 全repository + BalanceService）。handler層はモックリポジトリ、repository層はgo-sqlmockによるテスト
 
 # ──────────────────────────────────────
 # Frontend
@@ -282,7 +288,7 @@ infrastructure:
 # 未実装・不足部分
 # ──────────────────────────────────────
 gaps:
-  - "services層: handler→repoの直接呼び出しになっている"
+  - "services層: BalanceServiceのみ存在。他のhandlerはrepository直接呼び出し"
   - "Backendテスト: handler層・repository層ともに全テスト済み"
   - "E2Eテスト: Playwright設定済み。Home画面のみ。他画面のテストなし"
   - "OpenAPI仕様: api/openapi.yaml が存在しない"
