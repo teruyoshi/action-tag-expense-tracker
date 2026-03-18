@@ -74,7 +74,7 @@ else
   pass "Makefile が存在します"
 
   # 必須コマンドの存在チェック
-  REQUIRED_TARGETS="dev stop lint lint-frontend typecheck test quick-check check verify"
+  REQUIRED_TARGETS="dev stop build fmt fmt-frontend fmt-check fmt-check-frontend lint lint-frontend typecheck test test-frontend test-diff e2e quick-check check verify security-check security-check-full"
   for target in $REQUIRED_TARGETS; do
     if grep -qE "^${target}:" Makefile; then
       pass "make $target が定義されています"
@@ -149,7 +149,7 @@ echo ""
 
 echo "=== 4. ディレクトリ構造 ==="
 
-REQUIRED_DIRS="backend backend/cmd/server backend/handlers backend/repositories backend/models frontend frontend/src frontend/src/pages frontend/src/api .claude/skills"
+REQUIRED_DIRS="backend backend/cmd/server backend/handlers backend/repositories backend/models backend/migrations frontend frontend/src frontend/src/pages frontend/src/api e2e e2e/tests scripts .claude/skills .github/workflows"
 for dir in $REQUIRED_DIRS; do
   if [ -d "$dir" ]; then
     pass "$dir/ が存在します"
