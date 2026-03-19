@@ -17,10 +17,14 @@ export function BalanceCard({ balance, onBalanceUpdate }: Props) {
   const handleSubmit = () => {
     const amount = parseInt(balanceInput, 10)
     if (isNaN(amount)) return
-    onBalanceUpdate(amount).then(() => {
-      setShowModal(false)
-      setBalanceInput('')
-    })
+    onBalanceUpdate(amount)
+      .then(() => {
+        setShowModal(false)
+        setBalanceInput('')
+      })
+      .catch(() => {
+        alert('更新に失敗しました')
+      })
   }
 
   return (

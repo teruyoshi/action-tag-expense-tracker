@@ -7,12 +7,15 @@ export function useTags() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const fetchTags = () => {
-    api
-      .getTags()
-      .then(setTags)
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false))
+  const fetchTags = async () => {
+    try {
+      const data = await api.getTags()
+      setTags(data)
+    } catch (e) {
+      setError((e as Error).message)
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -21,18 +24,18 @@ export function useTags() {
 
   const createTag = async (name: string): Promise<ActionTag> => {
     const tag = await api.createTag(name)
-    fetchTags()
+    await fetchTags()
     return tag
   }
 
   const updateTag = async (id: number, name: string) => {
     await api.updateTag(id, name)
-    fetchTags()
+    await fetchTags()
   }
 
   const deleteTag = async (id: number) => {
     await api.deleteTag(id)
-    fetchTags()
+    await fetchTags()
   }
 
   return { tags, loading, error, createTag, updateTag, deleteTag }

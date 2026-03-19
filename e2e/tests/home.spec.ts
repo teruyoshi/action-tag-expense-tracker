@@ -20,7 +20,7 @@ test.describe("Home page", () => {
   });
 
   test("支出入力ボタンから画面遷移できる", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/", { waitUntil: "networkidle" });
 
     await page.getByRole("button", { name: "支出入力" }).click();
 
@@ -28,7 +28,7 @@ test.describe("Home page", () => {
   });
 
   test("支出理由管理ボタンから画面遷移できる", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/", { waitUntil: "networkidle" });
 
     await page.getByRole("button", { name: "支出理由管理" }).click();
 
