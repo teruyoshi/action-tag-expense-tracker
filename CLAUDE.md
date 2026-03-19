@@ -2,223 +2,110 @@
 
 ## プロジェクト概要
 
-フルスタックWebアプリケーション（モノレポ構成）。
-Backend は Go、Frontend は React + TypeScript。
+行動タグ型の家計簿Webアプリ（モノレポ構成）。
+Backend: Go / Frontend: React + TypeScript
 
-## 技術スタック
+詳細な構造・ドメイン・APIは `repo_map.yaml` を参照すること。
 
-| レイヤー | 技術 |
-|---|---|
-| Backend | Go 1.24 / chi / GORM |
-| Frontend | React / TypeScript / Vite |
-| DB | MySQL |
-| テスト | go test / Vitest / Playwright |
-| Lint | go vet / ESLint / Prettier |
-| セキュリティ | govulncheck / gosec / npm audit / gitleaks / trivy |
-| 環境 | Docker / Docker Compose |
-| タスクランナー | Make |
-| VCS | Git（trunk-based development） |
+## 基本ルール
 
-## ディレクトリ構造
+* AIは **必ず repo_map.yaml を最初に読む**
+* AIは **Makeコマンド経由のみで操作する**
+* 変更は小さく保つ（30〜200行 / 1〜3ファイル）
+* 既存パターンに従い、新しい設計を導入しない
+* main ブランチを常に動く状態に保つ
+* 人間の承認なしに次のフェーズに進まない
 
-```
-repo/
-├── backend/
-│   ├── cmd/server/main.go    # エントリーポイント
-│   ├── handlers/             # HTTPハンドラ
-│   ├── services/             # ビジネスロジック
-│   ├── repositories/         # DBアクセス
-│   ├── models/               # DBモデル
-│   ├── migrations/           # DBマイグレーション
-│   └── Dockerfile
-├── frontend/
-│   ├── src/
-│   │   ├── pages/            # ページコンポーネント
-│   │   ├── components/       # 共通コンポーネント
-│   │   ├── hooks/            # カスタムhooks（API呼び出しの分離）
-│   │   └── api/              # APIクライアント
-│   └── Dockerfile
-├── e2e/                      # E2Eテスト（Playwright）
-│   └── Dockerfile
-├── scripts/                  # Make から呼ばれるスクリプト
-├── .github/workflows/         # GitHub Actions CI
-├── .claude/skills/            # AI開発スキル
-├── repo_map.yaml             # AI用コードベース地図
-├── Makefile
-├── docker-compose.yml
-└── CLAUDE.md
-```
+## 開発フロー（最重要）
 
-## コマンド
+Feature → Slice分解 → [承認] → Slice実装ループ → Merge
 
-AIは **Make 経由のみ** でプロジェクトを操作する。
+### Slice実装ループ
 
-```bash
-# --- 開発 ---
-make dev              # 開発環境起動（Docker Compose: db + backend + frontend）
-make stop             # Docker Compose 停止
-make build            # Docker Compose ビルド
-make fmt              # Backend フォーマット（gofmt）
-make fmt-frontend     # Frontend フォーマット（Prettier）
+探索 → 影響分析 → [承認]
+→ 実装計画 → [承認]
+→ 実装 → テスト → 検証
+→ 構造レビュー → [人間レビュー]
+→ リファクタ提案
 
-# --- AI検証（3段階） ---
-make quick-check      # 編集直後: fmt-check + fmt-check-frontend + lint + lint-frontend + typecheck
-make check            # 実装完了: quick-check + test + test-frontend
-make verify           # 機能完成: check + e2e
+## 承認ポイント
 
-# --- 個別コマンド ---
-make lint             # Backend lint (go vet)
-make lint-frontend    # Frontend lint (ESLint)
-make typecheck        # Frontend 型チェック (tsc --noEmit)
-make test             # Backend テスト (go test)
-make test-frontend    # Frontend テスト (Vitest)
-make test-diff        # 変更ファイルの影響テストのみ実行
-make e2e              # E2E テスト (Playwright)
+以下は必ず人間の承認を得る：
 
-# --- マイグレーション ---
-make migrate-up       # DBマイグレーション適用
-make migrate-down     # DBマイグレーション1つ戻す
-make migrate-create   # 新規マイグレーションファイル作成
+1. Slice分解後
+2. 影響分析後
+3. 実装計画後
+4. 構造レビュー後
 
-# --- CI ---
-make ci-up            # CI用サービス起動（docker compose up -d --wait）
-make fmt-check        # Backend フォーマットチェック（変更なし）
-make fmt-check-frontend # Frontend フォーマットチェック（変更なし）
+## AIスキルの使用
 
-# --- セキュリティ ---
-make vuln-backend     # Backend 脆弱性チェック (govulncheck)
-make vuln-frontend    # Frontend 脆弱性チェック (npm audit)
-make sec-backend      # Backend 静的セキュリティ解析 (gosec)
-make sec-secrets      # シークレット漏洩検出 (gitleaks)
-make sec-fs           # リポジトリ全体スキャン (trivy, HIGH/CRITICAL)
-make security-check   # 日常用: vuln-backend + vuln-frontend + sec-backend + sec-secrets
-make security-check-full # PR前/CI用: security-check + sec-fs
-
-# --- 診断 ---
-make doctor           # プロジェクト整合性チェック
-```
-
-## 開発ワークフロー
-
-このプロジェクトは **安定継続型開発フロー** を採用する。
-
-### 基本原則
-
-1. 変更は小さく保つ（30〜200行 / 1〜3ファイル）
-2. main ブランチを常に動く状態に保つ
-3. 実装前に影響範囲を確認する
-4. AIは分析と生成に使う。設計判断は人間が行う
-5. 人間の承認なしに次のフェーズに進まない
-
-### フロー
-
-```
-Feature → Slice分解 → [承認] → Slice実装ループ → Merge → 次のSlice
-```
-
-各Sliceの実装ループ：
-
-```
-探索 → 影響分析 → [承認] → 実装計画 → [承認] → 実装 → テスト → 検証 → 構造レビュー → [人間レビュー] → リファクタ提案
-```
-
-### 人間の承認が必要なタイミング
-
-1. Slice分解後（粒度と順序の確認）
-2. 影響分析後（リスクの確認）
-3. 実装計画後（計画の承認）
-4. 構造レビュー後（self-reviewer のレビュー結果の確認）
-
-## AIスキル
-
-`.claude/skills/` ディレクトリに開発ワークフローの各フェーズを自動化するスキルがある。
+機能開発は必ず `dev-workflow-orchestrator` から開始。直接コード生成は禁止。
 
 | スキル | 役割 | タイミング |
 |---|---|---|
+| `dev-workflow-orchestrator` | 全体フローの統括 | 機能開発全体 |
 | `feature-to-slices` | FeatureをSliceに分解 | 機能開発の最初 |
 | `codebase-locator` | 実装場所の特定 | Slice実装開始時 |
 | `impact-analysis` | 影響範囲の分析 | 実装前 |
 | `slice-implementation-plan` | 具体的な実装計画の作成 | 影響分析後 |
 | `safe-code-generator` | 既存パターンに沿ったコード生成 | 計画承認後 |
 | `test-generator` | テストの生成 | 実装後 |
-| `change-verifier` | lint・型チェック・テストの実行（技術的検証のみ） | テスト生成後 |
+| `change-verifier` | lint・型チェック・テストの実行 | テスト生成後 |
 | `self-reviewer` | 構造・責務・リスクのレビュー | verify通過後 |
 | `refactor-suggester` | 小さなリファクタリング提案 | 構造レビュー後 |
-| `dev-workflow-orchestrator` | 全体フローの統括 | 機能開発全体 |
 | `diagnose-project-consistency` | プロジェクト構造の整合性診断 | セットアップ後・構造変更後 |
 
-機能開発を始めるときは **必ず** `dev-workflow-orchestrator` を起点にする。
-詳細な実装計画や指示書が添付されている場合も例外にしない。
-オーケストレーターを経由せずにコード生成・実装を直接行ってはならない。
+## AIの責務
 
-## AIの役割と制約
+### やること
 
-### AIがやること
+* コード探索・分析
+* 影響範囲の特定
+* 既存パターンに沿った実装
+* テスト生成
+* 検証（lint / typecheck / test）
+* セルフレビュー
+* 小規模リファクタ提案
 
-- コードベースの探索と分析
-- 影響範囲の特定
-- 既存パターンに沿ったコード生成
-- テスト生成
-- lint / typecheck / test / security-check の実行と結果報告
-- 構造・責務・リスクのセルフレビュー
-- 小さなリファクタリング提案
+### やらないこと
 
-### AIがやらないこと
+* アーキテクチャ設計
+* ドメイン設計
+* モジュール境界の変更
+* 大規模変更
+* 新技術導入
+* 人間の承認なしでのフェーズ進行
 
-- アーキテクチャ設計の決定
-- ドメインモデルの設計
-- モジュール境界の変更
-- 大規模リファクタリングの実行
-- 新しいフレームワークやライブラリの導入
-- 人間の承認なしでのフェーズ進行
+## 検証フロー
 
-## コード規約
+編集 → quick-check → … → check → security-check → verify → self-review
 
-- 既存コードのパターンに従う。新しいパターンを導入しない
-- 関数は小さく保つ
-- Backend: `go fmt` + `go vet` に従う
-- Frontend: ESLint + Prettier に従う
-- テスト: Backend はテーブルドリブンテスト、Frontend は Vitest
+### コマンド
 
-## repo_map.yaml
+```
+make quick-check       # 編集直後
+make check             # 実装完了
+make security-check    # 実装完了（セキュリティ）
+make verify            # 最終確認（check + e2e）
+```
 
-プロジェクトルートの `repo_map.yaml` はAIがコードベースを探索する際の地図として使う。
-新しいタスクに着手する際は、最初にこのファイルを読むこと。
+### セキュリティチェックの運用ルール
 
-## 検証チェックリスト
+* 実装完了時: `make security-check`（govulncheck + npm audit + gosec + gitleaks）
+* PR作成前 / mainマージ後: `make security-check-full`（security-check + trivy）
+* gosec 誤検知の場合: `// #nosec` コメントで抑制（理由を併記）
+* gitleaks でシークレット検出時: 即座にローテーションし、git履歴からの除去を検討
 
-コード変更後、段階的に検証する：
+## コーディング規約
 
-- [ ] `make quick-check` — 編集直後（fmt-check + fmt-check-frontend + lint + lint-frontend + typecheck）
-- [ ] `make check` — 実装完了時（quick-check + test + test-frontend）
-- [ ] `make security-check` — 実装完了時（脆弱性 + SAST + シークレット検出）
-- [ ] `make verify` — マージ前の最終確認（check + e2e）
-- [ ] `make security-check-full` — mainマージ後（security-check + trivy）※CIではmainブランチのみ実行
+* 既存コードのパターンに従う
+* Backend: go fmt / go vet
+* Frontend: ESLint / Prettier
+* テスト:
+  * Backend: テーブルドリブン
+  * Frontend: Vitest
 
-AI開発ループ: `編集 → quick-check → 編集 → quick-check → ... → check → security-check → verify → self-review`
+## 補足
 
-## セキュリティチェックガイド
-
-### ツール別の役割
-
-| ツール | 対象 | 検出内容 | コマンド |
-|---|---|---|---|
-| govulncheck | Backend | Go依存パッケージの既知脆弱性 | `make vuln-backend` |
-| gosec | Backend | Goコードの静的セキュリティ解析（SQLインジェクション、ハードコード秘密鍵等） | `make sec-backend` |
-| npm audit | Frontend | npm依存パッケージの既知脆弱性 | `make vuln-frontend` |
-| gitleaks | リポジトリ全体 | シークレット（APIキー、パスワード等）のコミット検出 | `make sec-secrets` |
-| trivy | リポジトリ全体 | ファイルシステムスキャン（HIGH/CRITICAL脆弱性） | `make sec-fs` |
-
-### 実行タイミング
-
-| タイミング | コマンド | 含まれるツール |
-|---|---|---|
-| 実装完了時 | `make security-check` | govulncheck + npm audit + gosec + gitleaks |
-| PR作成前 / CI（mainブランチ） | `make security-check-full` | security-check + trivy |
-
-### 対応方針
-
-- **govulncheck / npm audit**: 脆弱性が検出された場合、パッケージのアップデートを検討する。破壊的変更がある場合は人間に判断を委ねる
-- **gosec**: 検出された警告を確認し、誤検知でなければコードを修正する。誤検知の場合は `// #nosec` コメントで抑制（理由を併記）
-- **gitleaks**: シークレットが検出された場合、即座にローテーションし、git履歴からの除去を検討する
-- **trivy**: HIGH/CRITICAL脆弱性が検出された場合、影響範囲を確認し修正を優先する
+* 詳細な構造・API・ドメインは `repo_map.yaml` を参照
+* プロジェクト整合性チェック: `make doctor`
