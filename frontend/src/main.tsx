@@ -4,8 +4,7 @@ import { BrowserRouter } from 'react-router-dom'
 import './index.css'
 import App from './App.tsx'
 
-declare const __IS_CI__: boolean
-const isCI = __IS_CI__
+const isCI = import.meta.env.VITE_CI === 'true'
 
 const app = (
   <BrowserRouter>
