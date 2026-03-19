@@ -80,7 +80,7 @@ migrate-create:
 # ---------- CI ----------
 
 ci-up:
-	CI=true VITE_WATCH=false docker compose up -d --wait
+	VITE_WATCH=false docker compose up -d --wait
 
 # ---------- SECURITY ----------
 
