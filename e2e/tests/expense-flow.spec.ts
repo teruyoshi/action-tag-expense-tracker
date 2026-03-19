@@ -5,7 +5,8 @@ test.describe("支出入力フロー", () => {
     const tagName = `テスト理由${Date.now()}`;
 
     // Home → 支出入力
-    await page.goto("/", { waitUntil: "networkidle" });
+    await page.goto("/");
+    await expect(page.getByText("所持金")).toBeVisible();
     await page.getByRole("button", { name: "支出入力" }).click();
     await expect(page.getByText("支出理由を選択")).toBeVisible();
 
@@ -33,7 +34,8 @@ test.describe("支出入力フロー", () => {
     const tagName = `既存タグ${Date.now()}`;
 
     // まずタグを作成（支出理由管理から）
-    await page.goto("/", { waitUntil: "networkidle" });
+    await page.goto("/");
+    await expect(page.getByText("所持金")).toBeVisible();
     await page.getByRole("button", { name: "支出理由管理" }).click();
     await expect(
       page.getByRole("heading", { name: "支出理由管理" })
@@ -48,7 +50,7 @@ test.describe("支出入力フロー", () => {
 
     // Homeに戻る
     await page.getByRole("button", { name: "← 戻る" }).click();
-    await page.waitForLoadState("networkidle");
+    await expect(page.getByRole("heading", { name: "家計簿" })).toBeVisible();
 
     // 支出入力でタグを選択
     await page.getByRole("button", { name: "支出入力" }).click();
