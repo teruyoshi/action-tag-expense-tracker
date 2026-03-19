@@ -1,5 +1,5 @@
 # repo_map.yaml - AI用コードベース地図
-# 最終更新: 2026-03-18
+# 最終更新: 2026-03-19
 
 project:
   name: action-tag-expense-tracker
@@ -59,7 +59,7 @@ backend:
         - backend/handlers/balance.go      # BalanceHandler: Get, Update（Update時に減額分の支出を自動作成）
         - backend/handlers/helpers.go          # writeJSON, writeError, parseDate, parseYearMonth
         - backend/handlers/mocks_test.go       # テスト用モックリポジトリ
-        - backend/handlers/helpers_test.go     # TestWriteJSON, TestParseDate, TestParseYearMonth
+        - backend/handlers/helpers_test.go     # TestWriteJSON, TestWriteError, TestParseDate, TestParseYearMonth
         - backend/handlers/action_tag_test.go  # TestActionTagHandler (List, Create, Update, Delete)
         - backend/handlers/event_test.go       # TestEventHandler (Create)
         - backend/handlers/expense_test.go     # TestExpenseHandler (Create, Update)
@@ -136,29 +136,31 @@ frontend:
     Home:
       file: frontend/src/pages/Home.tsx
       description: トップページ。月別支出合計・タグ別集計・所持金を表示。月ナビゲーション付き
-      api_calls: [getMonthTotal, getTagTotals, getBalance, updateBalance]
+      hooks: [useBalance]
+      api_calls: [getMonthTotal, getTagTotalsWithDiff]
       navigates_to: [tag-select, tag-manage, tag-details]
 
     TagSelect:
       file: frontend/src/pages/TagSelect.tsx
       description: 支出入力前にタグを選択する画面。新規タグの作成も可能
-      api_calls: [getTags, createTag]
+      hooks: [useTags]
       navigates_to: [expense-input]
 
     ExpenseInput:
       file: frontend/src/pages/ExpenseInput.tsx
       description: 支出入力画面。日付・タグ（選択済み）と複数の支出行（項目+金額）を入力して保存
-      api_calls: [createEvent, createExpense]
+      hooks: [useExpenses]
       notes: 保存時にまずEventを作成し、各行のExpenseを順次作成する
 
     TagManage:
       file: frontend/src/pages/TagManage.tsx
       description: タグのCRUD管理画面
-      api_calls: [getTags, createTag, updateTag, deleteTag]
+      hooks: [useTags]
 
     TagDetails:
       file: frontend/src/pages/TagDetails.tsx
       description: タグ別の支出明細画面。指定月のタグに紐づく支出一覧と合計を表示
+      hooks: [useExpenses]
       api_calls: [getTagExpenseDetails]
 
   api_client:
