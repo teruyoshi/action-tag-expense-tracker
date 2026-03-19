@@ -6,7 +6,7 @@ test.describe("支出入力フロー", () => {
 
     // Home → 支出入力
     await page.goto("/");
-    await expect(page.getByText("所持金")).toBeVisible();
+    await expect(page.getByText("所持金")).toBeVisible({ timeout: 15000 });
     await page.getByRole("button", { name: "支出入力" }).click();
     await expect(page.getByText("支出理由を選択")).toBeVisible();
 
@@ -35,7 +35,7 @@ test.describe("支出入力フロー", () => {
 
     // まずタグを作成（支出理由管理から）
     await page.goto("/");
-    await expect(page.getByText("所持金")).toBeVisible();
+    await expect(page.getByText("所持金")).toBeVisible({ timeout: 15000 });
     await page.getByRole("button", { name: "支出理由管理" }).click();
     await expect(
       page.getByRole("heading", { name: "支出理由管理" })

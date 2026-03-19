@@ -54,6 +54,7 @@ test-diff:
 # ---------- E2E ----------
 
 e2e:
+	docker compose up -d --wait frontend
 	docker compose run --rm e2e
 
 # ---------- AI CHECK ----------

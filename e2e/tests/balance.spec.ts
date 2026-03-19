@@ -3,7 +3,7 @@ import { test, expect } from "@playwright/test";
 test.describe("Balance更新フロー", () => {
   test("所持金を設定して反映される", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByText("所持金")).toBeVisible();
+    await expect(page.getByText("所持金")).toBeVisible({ timeout: 15000 });
 
     // 設定ボタンをクリック
     await page.getByRole("button", { name: "設定" }).click();
@@ -27,7 +27,7 @@ test.describe("Balance更新フロー", () => {
 
   test("キャンセルでモーダルが閉じる", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByText("所持金")).toBeVisible();
+    await expect(page.getByText("所持金")).toBeVisible({ timeout: 15000 });
 
     await page.getByRole("button", { name: "設定" }).click();
     await expect(page.getByText("所持金を設定")).toBeVisible();

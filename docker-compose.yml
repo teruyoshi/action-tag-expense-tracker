@@ -38,6 +38,7 @@ services:
       - "5173:5173"
     environment:
       - VITE_WATCH=${VITE_WATCH:-false}
+      - VITE_CI=${CI:-false}
     volumes:
       - ./frontend:/app
       - /app/node_modules

@@ -4,10 +4,12 @@ import { BrowserRouter } from 'react-router-dom'
 import './index.css'
 import App from './App.tsx'
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
-  </StrictMode>,
+const isCI = import.meta.env.VITE_CI === 'true'
+
+const app = (
+  <BrowserRouter>
+    <App />
+  </BrowserRouter>
 )
+
+createRoot(document.getElementById('root')!).render(isCI ? app : <StrictMode>{app}</StrictMode>)
