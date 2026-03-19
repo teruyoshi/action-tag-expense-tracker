@@ -6,7 +6,7 @@ test.describe("支出入力フロー", () => {
 
     // Home → 支出入力
     await page.goto("/");
-    await expect(page.getByText("所持金")).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText("所持金")).toBeVisible();
     await page.getByRole("button", { name: "支出入力" }).click();
     await expect(page.getByText("支出理由を選択")).toBeVisible();
 
@@ -16,7 +16,7 @@ test.describe("支出入力フロー", () => {
     await page.getByRole("button", { name: "追加" }).click();
 
     // 支出入力画面に自動遷移を待つ（URLで確認）
-    await page.waitForURL("**/expense/new", { timeout: 15000 });
+    await page.waitForURL("**/expense/new");
 
     // 金額入力
     await page.getByPlaceholder("金額").fill("1500");
@@ -26,7 +26,7 @@ test.describe("支出入力フロー", () => {
     await page.getByRole("button", { name: "保存" }).click();
 
     // Homeに戻る
-    await page.waitForURL("/", { timeout: 10000 });
+    await page.waitForURL("/");
     await expect(page.getByRole("heading", { name: "家計簿" })).toBeVisible();
   });
 
@@ -35,7 +35,7 @@ test.describe("支出入力フロー", () => {
 
     // まずタグを作成（支出理由管理から）
     await page.goto("/");
-    await expect(page.getByText("所持金")).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText("所持金")).toBeVisible();
     await page.getByRole("button", { name: "支出理由管理" }).click();
     await expect(
       page.getByRole("heading", { name: "支出理由管理" })
@@ -46,7 +46,7 @@ test.describe("支出入力フロー", () => {
     await page.getByRole("button", { name: "追加" }).click();
 
     // タグが一覧に表示されるのを確認
-    await expect(page.getByText(tagName)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(tagName)).toBeVisible();
 
     // Homeに戻る
     await page.getByRole("button", { name: "← 戻る" }).click();
@@ -54,18 +54,16 @@ test.describe("支出入力フロー", () => {
 
     // 支出入力でタグを選択
     await page.getByRole("button", { name: "支出入力" }).click();
-    await expect(page.getByRole("button", { name: tagName })).toBeVisible({
-      timeout: 10000,
-    });
+    await expect(page.getByRole("button", { name: tagName })).toBeVisible();
     await page.getByRole("button", { name: tagName }).click();
 
     // 支出入力画面
-    await page.waitForURL("**/expense/new", { timeout: 10000 });
+    await page.waitForURL("**/expense/new");
     await page.getByPlaceholder("金額").fill("2000");
     await page.getByRole("button", { name: "保存" }).click();
 
     // Homeに戻る
-    await page.waitForURL("/", { timeout: 10000 });
+    await page.waitForURL("/");
     await expect(page.getByRole("heading", { name: "家計簿" })).toBeVisible();
   });
 });

@@ -21,7 +21,7 @@ test.describe("Home page", () => {
 
   test("支出入力ボタンから画面遷移できる", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByText("所持金")).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText("所持金")).toBeVisible();
 
     await page.getByRole("button", { name: "支出入力" }).click();
 
@@ -30,7 +30,7 @@ test.describe("Home page", () => {
 
   test("支出理由管理ボタンから画面遷移できる", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByText("所持金")).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText("所持金")).toBeVisible();
 
     await page.getByRole("button", { name: "支出理由管理" }).click();
 
