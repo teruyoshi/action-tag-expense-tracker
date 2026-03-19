@@ -4,8 +4,13 @@ import react from '@vitejs/plugin-react'
 const enableWatch = process.env.VITE_WATCH === 'true'
 
 // https://vite.dev/config/
+const isCI = process.env.VITE_CI === 'true' || process.env.CI === 'true'
+
 export default defineConfig({
   plugins: [react()],
+  define: {
+    __IS_CI__: JSON.stringify(isCI),
+  },
   server: {
     host: true,
     allowedHosts: ['frontend'],
