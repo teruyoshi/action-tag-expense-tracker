@@ -57,7 +57,7 @@ backend:
         - backend/handlers/expense.go      # ExpenseHandler: Create, Update
         - backend/handlers/summary.go      # SummaryHandler: MonthTotal, TagMonthTotals, TagMonthTotalsWithDiff, TagExpenseDetails
         - backend/handlers/balance.go      # BalanceHandler: Get, Update（Update時に減額分の支出を自動作成）
-        - backend/handlers/helpers.go          # parseDate, writeJSON
+        - backend/handlers/helpers.go          # writeJSON, writeError, parseDate, parseYearMonth
         - backend/handlers/mocks_test.go       # テスト用モックリポジトリ
         - backend/handlers/helpers_test.go     # TestWriteJSON, TestParseDate, TestParseYearMonth
         - backend/handlers/action_tag_test.go  # TestActionTagHandler (List, Create, Update, Delete)

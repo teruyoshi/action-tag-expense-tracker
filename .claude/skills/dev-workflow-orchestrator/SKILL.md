@@ -134,12 +134,15 @@ self-reviewer は構造・責務・リスクの観点でレビューを行う。
 
 #### Step 8: リファクタ提案
 
-レビュー完了後、`refactor-suggester` を実行し、リファクタリング候補を提示する。
-ユーザーが不要と判断した場合はスキップできるが、**原則として毎回実行する**。
+self-reviewer が APPROVE を出した後、**コミット・マージに進む前に** `refactor-suggester` を実行する。
+**スキップ禁止。** self-reviewer → refactor-suggester の順序を必ず守ること。
+
+リファクタリング候補を提示し、ユーザーが実行を承認した場合は修正 → Step 6（検証）をやり直す。
+ユーザーが不要と判断した場合はそのままマージに進む。
 
 #### Step 9: マージ → 次のSlice
 
-レビューOKであれば、次のSliceへ進む。
+refactor-suggester 完了後、マージしてよいか確認し、次のSliceへ進む。
 
 ## 人間の承認ポイント
 

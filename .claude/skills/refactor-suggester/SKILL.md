@@ -99,17 +99,20 @@ make check         # quick-check + test + test-frontend
 
 全て通ることを確認してから完了とする。
 
-## このプロジェクトの確認済み状態（2026-03-15時点）
+## このプロジェクトの確認済み状態（2026-03-19時点）
 
 以下は直近の分析で確認済みの事項。再分析時の参考にする：
 
 ### Backend
-- ヘルパー関数（`writeJSON`, `parseDate`, `parseYearMonth`）は `handlers/helpers.go` に集約済み。重複なし
+- ヘルパー関数（`writeJSON`, `writeError`, `parseDate`, `parseYearMonth`）は `handlers/helpers.go` に集約済み。重複なし
+- 全handlerのエラーレスポンスは `writeError` でJSON統一済み
 - Repository層は各ドメインごとに1ファイル。インターフェースは `interfaces.go` に集約済み
-- Handler → Repository の直接呼び出し（services層なし）は意図的な設計
+- services層は `BalanceService` のみ。他のhandlerはrepository直接呼び出し（意図的な設計）
 
 ### Frontend
-- `TagSelect` と `TagManage` で類似のタグ取得パターン（`useState` + `useEffect` + `api.getTags()`）があるが、`TagManage` はリロード用に `load` 関数として使っており、単純なhook化はかえって複雑になるため現状維持が適切
+- カスタムhooks導入済み: `useBalance`（所持金）、`useTags`（タグCRUD）、`useExpenses`（支出作成・更新）
+- `useExpenses` は状態を持たないhook（apiの薄いラッパー）。hookとしての形式統一を優先し現状維持
+- `Home.tsx` は `useBalance` hookと `api` を両方importしている（月サマリー取得が直接呼び出し）。`useSummary` hook導入は変更が大きいため見送り中
 - 各ページの「戻る」ボタンは似ているが遷移先が異なるため共通化のメリットは薄い
 - 共通コンポーネント（`MonthNav`, `BalanceCard`, `TagSummaryCard`）は `components/` に分離済み
 
