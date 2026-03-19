@@ -295,6 +295,53 @@ infrastructure:
       security-check-full: フルセキュリティチェック（security-check + trivy）
 
 # ──────────────────────────────────────
+# ユースケース
+# ──────────────────────────────────────
+use_cases:
+  create_expense_flow:
+    description: タグを選択して支出を登録する一連の流れ
+    steps:
+      - step: タグ選択
+        frontend: TagSelect
+        action: 既存タグを選択 or 新規作成
+      - step: イベント作成
+        api: POST /events
+        description: 日付 + action_tag_id で Event を作成
+      - step: 支出作成（複数）
+        api: POST /expenses
+        description: Event に紐づく支出行を複数登録
+
+  manage_tags:
+    description: タグのCRUD操作
+    operations:
+      - name: 一覧取得
+        api: GET /tags
+      - name: 作成
+        api: POST /tags
+      - name: 更新
+        api: PUT /tags/{id}
+      - name: 削除
+        api: DELETE /tags/{id}
+
+  view_month_summary:
+    description: 月ごとの支出集計を表示
+    apis:
+      - GET /summary/month
+      - GET /summary/tag
+      - GET /summary/tag/diff
+
+  view_tag_details:
+    description: タグごとの支出明細表示
+    api: GET /summary/tag/details
+    query: [year, month, tag_id]
+
+  update_balance:
+    description: 所持金更新（減額時に支出が自動作成される）
+    api: PUT /balance
+    notes:
+      - 減額時は内部で Expense が自動生成される
+
+# ──────────────────────────────────────
 # 未実装・不足部分
 # ──────────────────────────────────────
 gaps:
