@@ -72,6 +72,14 @@ describe('Home', () => {
     })
   })
 
+  it('APIがnullを返した場合も「データなし」を表示する', async () => {
+    mockApi.getTagTotalsWithDiff.mockResolvedValue(null as unknown as [])
+    renderHome()
+    await waitFor(() => {
+      expect(screen.getByText('データなし')).toBeInTheDocument()
+    })
+  })
+
   it('月ナビゲーションで前月に移動する', async () => {
     renderHome()
     const user = userEvent.setup()

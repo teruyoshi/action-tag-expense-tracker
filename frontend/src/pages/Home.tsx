@@ -22,7 +22,7 @@ export function Home() {
       if (!ignore) setTotal(r.total)
     })
     api.getTagTotalsWithDiff(year, month).then((data) => {
-      if (!ignore) setTagTotals(data)
+      if (!ignore) setTagTotals(data ?? [])
     })
     return () => {
       ignore = true
@@ -64,7 +64,7 @@ export function Home() {
         onBalanceUpdate={async (amount) => {
           await updateBalance(amount)
           api.getMonthTotal(year, month).then((r) => setTotal(r.total))
-          api.getTagTotalsWithDiff(year, month).then(setTagTotals)
+          api.getTagTotalsWithDiff(year, month).then((data) => setTagTotals(data ?? []))
         }}
       />
 
