@@ -17,8 +17,16 @@ export function Home() {
   const { balance, updateBalance } = useBalance()
 
   useEffect(() => {
-    api.getMonthTotal(year, month).then((r) => setTotal(r.total))
-    api.getTagTotalsWithDiff(year, month).then(setTagTotals)
+    let ignore = false
+    api.getMonthTotal(year, month).then((r) => {
+      if (!ignore) setTotal(r.total)
+    })
+    api.getTagTotalsWithDiff(year, month).then((data) => {
+      if (!ignore) setTagTotals(data)
+    })
+    return () => {
+      ignore = true
+    }
   }, [year, month])
 
   const changeMonth = (delta: number) => {

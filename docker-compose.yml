@@ -54,6 +54,8 @@ services:
     volumes:
       - ./e2e:/app
       - /app/node_modules
+    environment:
+      - CI=true
     depends_on:
       frontend:
         condition: service_healthy

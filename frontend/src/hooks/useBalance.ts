@@ -7,11 +7,21 @@ export function useBalance() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    let ignore = false
     api
       .getBalance()
-      .then((b) => setBalance(b.amount))
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false))
+      .then((b) => {
+        if (!ignore) setBalance(b.amount)
+      })
+      .catch((e) => {
+        if (!ignore) setError(e.message)
+      })
+      .finally(() => {
+        if (!ignore) setLoading(false)
+      })
+    return () => {
+      ignore = true
+    }
   }, [])
 
   const updateBalance = async (amount: number): Promise<number> => {
