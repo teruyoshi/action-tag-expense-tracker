@@ -36,6 +36,8 @@ services:
     build: ./frontend
     ports:
       - "5173:5173"
+    environment:
+      - VITE_WATCH=${VITE_WATCH:-false}
     volumes:
       - ./frontend:/app
       - /app/node_modules
