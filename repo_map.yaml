@@ -1,5 +1,5 @@
 # repo_map.yaml - AI用コードベース地図
-# 最終更新: 2026-03-19
+# 最終更新: 2026-03-22
 
 project:
   name: action-tag-expense-tracker
@@ -282,7 +282,7 @@ infrastructure:
       verify: check + e2e
       test-diff: 変更ファイルの影響テストのみ実行
       doctor: プロジェクト整合性チェック
-      ci-up: CI用サービス起動（docker compose up -d --wait）
+      ci-up: CI用サービス起動（VITE_WATCH=false docker compose up -d --wait）
       migrate-up: DBマイグレーション適用
       migrate-down: DBマイグレーション1つ戻す
       migrate-create: 新規マイグレーションファイル作成

@@ -35,7 +35,7 @@ func (r *SummaryRepository) MonthTotal(year, month int) (int, error) {
 }
 
 func (r *SummaryRepository) TagMonthTotals(year, month int) ([]TagSummary, error) {
-	var results []TagSummary
+	results := make([]TagSummary, 0)
 	err := r.DB.Raw(`
 		SELECT at.id AS tag_id, at.name AS tag, COALESCE(SUM(e.amount), 0) AS total
 		FROM expenses e
@@ -79,7 +79,7 @@ func (r *SummaryRepository) TagMonthTotalsWithDiff(year, month int) ([]TagSummar
 	}
 
 	seen := make(map[uint]bool)
-	var results []TagSummaryWithDiff
+	results := make([]TagSummaryWithDiff, 0)
 
 	for _, c := range current {
 		seen[c.TagID] = true
@@ -114,7 +114,7 @@ func (r *SummaryRepository) TagMonthTotalsWithDiff(year, month int) ([]TagSummar
 }
 
 func (r *SummaryRepository) TagExpenseDetails(year, month, tagID int) ([]TagExpenseDetail, error) {
-	var results []TagExpenseDetail
+	results := make([]TagExpenseDetail, 0)
 	err := r.DB.Raw(`
 		SELECT e.id, DATE_FORMAT(ev.date, '%Y-%m-%d') AS date, e.item, e.amount
 		FROM expenses e
