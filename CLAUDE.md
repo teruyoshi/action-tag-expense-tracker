@@ -76,23 +76,24 @@ Feature → Slice分解 → [承認] → Slice実装ループ → Merge
 * 新技術導入
 * 人間の承認なしでのフェーズ進行
 
-## 検証フロー
+## Makeコマンド
+
+Makeコマンドの詳細は `.claude/docs/make-commands.md` を参照すること。
+
+### 検証フロー
 
 編集 → quick-check → … → check → security-check → verify → self-review
 
-### コマンド
-
 ```
-make quick-check       # 編集直後
-make check             # 実装完了
-make security-check    # 実装完了（セキュリティ）
-make verify            # 最終確認（check + e2e）
+make quick-check       # fmt-check + fmt-check-frontend + lint + lint-frontend + typecheck（編集直後）
+make check             # quick-check + test + test-frontend（実装完了）
+make verify            # check + e2e（最終確認）
 ```
 
 ### セキュリティチェックの運用ルール
 
-* 実装完了時: `make security-check`（govulncheck + npm audit + gosec + gitleaks）
-* PR作成前 / mainマージ後: `make security-check-full`（security-check + trivy）
+* 実装完了時: `make security-check`
+* PR作成前 / mainマージ後: `make security-check-full`
 * gosec 誤検知の場合: `// #nosec` コメントで抑制（理由を併記）
 * gitleaks でシークレット検出時: 即座にローテーションし、git履歴からの除去を検討
 
@@ -108,4 +109,3 @@ make verify            # 最終確認（check + e2e）
 ## 補足
 
 * 詳細な構造・API・ドメインは `repo_map.yaml` を参照
-* プロジェクト整合性チェック: `make doctor`

@@ -267,6 +267,7 @@ infrastructure:
       dev: Docker Compose起動（db + backend + frontend）
       stop: Docker Compose停止
       build: Docker Compose ビルド
+      clean: Docker環境の完全クリーンアップ（コンテナ・ボリューム・イメージ削除）
       fmt: Backend gofmt
       fmt-frontend: Frontend Prettier
       fmt-check: Backend フォーマットチェック（変更なし）

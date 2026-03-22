@@ -1,4 +1,4 @@
-.PHONY: dev stop build fmt fmt-frontend fmt-check fmt-check-frontend lint lint-frontend test test-frontend typecheck e2e quick-check check verify test-diff doctor migrate-up migrate-down migrate-create ci-up vuln-backend vuln-frontend sec-backend sec-secrets sec-fs security-check security-check-full
+.PHONY: dev stop build clean fmt fmt-frontend fmt-check fmt-check-frontend lint lint-frontend test test-frontend typecheck e2e quick-check check verify test-diff doctor migrate-up migrate-down migrate-create ci-up vuln-backend vuln-frontend sec-backend sec-secrets sec-fs security-check security-check-full
 
 # ---------- DEV ----------
 
@@ -12,6 +12,9 @@ stop:
 
 build:
 	docker compose build
+
+clean:
+	docker compose down -v --rmi all --remove-orphans
 
 # ---------- FORMAT ----------
 
