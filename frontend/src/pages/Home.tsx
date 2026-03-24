@@ -86,8 +86,14 @@ export function Home() {
         <button className="btn-primary" onClick={() => navigate('/tags/select')}>
           支出入力
         </button>
+        <button className="btn-primary" onClick={() => navigate('/income/new')}>
+          収入入力
+        </button>
         <button className="btn-secondary" onClick={() => navigate('/tags/manage')}>
           支出理由管理
+        </button>
+        <button className="btn-secondary" onClick={() => navigate('/income-categories/manage')}>
+          収入カテゴリ管理
         </button>
       </div>
     </div>

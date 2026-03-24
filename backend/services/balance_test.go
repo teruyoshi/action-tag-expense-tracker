@@ -32,6 +32,13 @@ func (m *mockBalanceRepo) Subtract(amount int) error {
 	m.balance.Amount -= amount
 	return nil
 }
+func (m *mockBalanceRepo) Add(amount int) error {
+	if m.err != nil {
+		return m.err
+	}
+	m.balance.Amount += amount
+	return nil
+}
 
 type mockActionTagRepo struct {
 	tags []models.ActionTag

@@ -31,4 +31,21 @@ type BalanceRepo interface {
 	Get() (*models.Balance, error)
 	Update(amount int) (*models.Balance, error)
 	Subtract(amount int) error
+	Add(amount int) error
+}
+
+type IncomeCategoryRepo interface {
+	FindAll() ([]models.IncomeCategory, error)
+	Create(category *models.IncomeCategory) error
+	Update(category *models.IncomeCategory) error
+	Delete(id uint) error
+	FindByID(id uint) (*models.IncomeCategory, error)
+}
+
+type IncomeRepo interface {
+	FindAll(year, month int) ([]models.Income, error)
+	FindByID(id uint) (*models.Income, error)
+	Create(income *models.Income) error
+	Update(income *models.Income) error
+	Delete(id uint) error
 }

@@ -43,3 +43,12 @@ func (r *BalanceRepository) Subtract(amount int) error {
 	balance.Amount -= amount
 	return r.DB.Save(balance).Error
 }
+
+func (r *BalanceRepository) Add(amount int) error {
+	balance, err := r.Get()
+	if err != nil {
+		return err
+	}
+	balance.Amount += amount
+	return r.DB.Save(balance).Error
+}

@@ -27,3 +27,17 @@ type Balance struct {
 	Amount    int       `json:"amount" gorm:"not null;default:0"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
+
+type IncomeCategory struct {
+	ID   uint   `json:"id" gorm:"primaryKey"`
+	Name string `json:"name" gorm:"not null"`
+}
+
+type Income struct {
+	ID               uint           `json:"id" gorm:"primaryKey"`
+	IncomeCategoryID uint           `json:"income_category_id" gorm:"not null"`
+	IncomeCategory   IncomeCategory `json:"income_category,omitempty" gorm:"foreignKey:IncomeCategoryID"`
+	Date             time.Time      `json:"date" gorm:"type:date;not null"`
+	Description      string         `json:"description"`
+	Amount           int            `json:"amount" gorm:"not null"`
+}

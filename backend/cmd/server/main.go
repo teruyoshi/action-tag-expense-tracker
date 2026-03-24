@@ -40,6 +40,8 @@ func main() {
 	expenseRepo := &repositories.ExpenseRepository{DB: db}
 	summaryRepo := &repositories.SummaryRepository{DB: db}
 	balanceRepo := &repositories.BalanceRepository{DB: db}
+	incomeCategoryRepo := &repositories.IncomeCategoryRepository{DB: db}
+	incomeRepo := &repositories.IncomeRepository{DB: db}
 
 	tagHandler := &handlers.ActionTagHandler{Repo: tagRepo}
 	eventHandler := &handlers.EventHandler{Repo: eventRepo}
@@ -54,6 +56,15 @@ func main() {
 	balanceHandler := &handlers.BalanceHandler{
 		Repo:    balanceRepo,
 		Service: balanceService,
+	}
+	incomeCategoryHandler := &handlers.IncomeCategoryHandler{Repo: incomeCategoryRepo}
+	incomeService := &services.IncomeService{
+		IncomeRepo:  incomeRepo,
+		BalanceRepo: balanceRepo,
+	}
+	incomeHandler := &handlers.IncomeHandler{
+		Repo:    incomeRepo,
+		Service: incomeService,
 	}
 
 	r := chi.NewRouter()
@@ -84,6 +95,16 @@ func main() {
 
 	r.Get("/balance", balanceHandler.Get)
 	r.Put("/balance", balanceHandler.Update)
+
+	r.Get("/income-categories", incomeCategoryHandler.List)
+	r.Post("/income-categories", incomeCategoryHandler.Create)
+	r.Put("/income-categories/{id}", incomeCategoryHandler.Update)
+	r.Delete("/income-categories/{id}", incomeCategoryHandler.Delete)
+
+	r.Get("/incomes", incomeHandler.List)
+	r.Post("/incomes", incomeHandler.Create)
+	r.Put("/incomes/{id}", incomeHandler.Update)
+	r.Delete("/incomes/{id}", incomeHandler.Delete)
 
 	port := getEnv("PORT", "8080")
 	fmt.Printf("Server running on :%s\n", port)

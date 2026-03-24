@@ -65,6 +65,20 @@ export interface Balance {
   updated_at: string
 }
 
+export interface IncomeCategory {
+  id: number
+  name: string
+}
+
+export interface Income {
+  id: number
+  income_category_id: number
+  income_category?: IncomeCategory
+  date: string
+  description: string
+  amount: number
+}
+
 export const api = {
   getTags: () => request<ActionTag[]>('/tags'),
   createTag: (name: string) =>
@@ -103,4 +117,48 @@ export const api = {
   getBalance: () => request<Balance>('/balance'),
   updateBalance: (amount: number) =>
     request<Balance>('/balance', { method: 'PUT', body: JSON.stringify({ amount }) }),
+
+  getIncomeCategories: () => request<IncomeCategory[]>('/income-categories'),
+  createIncomeCategory: (name: string) =>
+    request<IncomeCategory>('/income-categories', {
+      method: 'POST',
+      body: JSON.stringify({ name }),
+    }),
+  updateIncomeCategory: (id: number, name: string) =>
+    request<IncomeCategory>(`/income-categories/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ name }),
+    }),
+  deleteIncomeCategory: (id: number) =>
+    request<void>(`/income-categories/${id}`, { method: 'DELETE' }),
+
+  getIncomes: (year: number, month: number) =>
+    request<Income[]>(`/incomes?year=${year}&month=${month}`),
+  createIncome: (income_category_id: number, date: string, description: string, amount: number) =>
+    request<Income>('/incomes', {
+      method: 'POST',
+      body: JSON.stringify({
+        income_category_id,
+        date,
+        description: description || undefined,
+        amount,
+      }),
+    }),
+  updateIncome: (
+    id: number,
+    income_category_id: number,
+    date: string,
+    description: string,
+    amount: number,
+  ) =>
+    request<Income>(`/incomes/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        income_category_id,
+        date,
+        description: description || undefined,
+        amount,
+      }),
+    }),
+  deleteIncome: (id: number) => request<void>(`/incomes/${id}`, { method: 'DELETE' }),
 }

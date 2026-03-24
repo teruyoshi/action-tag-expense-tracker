@@ -1,0 +1,13 @@
+CREATE TABLE IF NOT EXISTS income_categories (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS incomes (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    income_category_id BIGINT UNSIGNED NOT NULL,
+    date DATE NOT NULL,
+    description VARCHAR(255),
+    amount BIGINT NOT NULL,
+    CONSTRAINT fk_incomes_income_category FOREIGN KEY (income_category_id) REFERENCES income_categories(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

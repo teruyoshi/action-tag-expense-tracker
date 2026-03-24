@@ -142,3 +142,9 @@ func (m *mockBalanceRepo) Subtract(amount int) error {
 	m.subtracted = amount
 	return nil
 }
+func (m *mockBalanceRepo) Add(amount int) error {
+	if m.err != nil {
+		return m.err
+	}
+	return nil
+}

@@ -100,3 +100,24 @@ func TestBalanceRepository_Subtract(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestBalanceRepository_Add(t *testing.T) {
+	db, mock := setupMockDB(t)
+
+	rows := sqlmock.NewRows([]string{"id", "amount", "updated_at"}).
+		AddRow(1, 50000, time.Date(2026, 3, 15, 0, 0, 0, 0, time.UTC))
+	mock.ExpectQuery("SELECT \\* FROM `balances`").WillReturnRows(rows)
+	mock.ExpectBegin()
+	mock.ExpectExec("UPDATE `balances`").
+		WillReturnResult(sqlmock.NewResult(0, 1))
+	mock.ExpectCommit()
+
+	repo := &BalanceRepository{DB: db}
+
+	if err := repo.Add(3000); err != nil {
+		t.Fatalf("Add() error = %v", err)
+	}
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatal(err)
+	}
+}
