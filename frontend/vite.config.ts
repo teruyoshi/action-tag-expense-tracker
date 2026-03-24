@@ -16,6 +16,8 @@ export default defineConfig({
       '/expenses': 'http://backend:8080',
       '/summary': 'http://backend:8080',
       '/balance': 'http://backend:8080',
+      '/income-categories': 'http://backend:8080',
+      '/incomes': 'http://backend:8080',
     },
   },
 })
