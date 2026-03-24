@@ -9,6 +9,11 @@ set -euo pipefail
 #   3. Docker の整合性
 #   4. ディレクトリ構造
 #   5. 依存関係
+#   6. テスト整合性
+#   7. Migration 整合性
+#   8. CI/CD 整合性
+#   9. Lint/Formatter 設定
+#  10. スキル一覧整合性
 
 cd "$(git rev-parse --show-toplevel)"
 
@@ -28,39 +33,36 @@ if [ ! -f "repo_map.yaml" ]; then
 else
   pass "repo_map.yaml が存在します"
 
-  # repo_map に記載されたエントリーポイントが実在するか
-  if grep -q "cmd/server/main.go" repo_map.yaml; then
-    if [ -f "backend/cmd/server/main.go" ]; then
-      pass "Backend エントリーポイントが実在します"
+  # repo_map の構造キーが存在するか
+  for key in "domain:" "backend:" "frontend:" "infrastructure:" "constraints:"; do
+    if grep -q "$key" repo_map.yaml; then
+      pass "repo_map に $key セクションがあります"
     else
-      fail "repo_map に記載の backend/cmd/server/main.go が存在しません"
+      fail "repo_map に $key セクションがありません"
     fi
+  done
+
+  # repo_map の api_routes に記載されたルートに対応するハンドラが存在するか
+  # ルートの最初のパス要素を抽出し、ハンドラディレクトリ内にそのルートを処理するファイルがあるか確認
+  for route_path in $(grep -oE '(GET|POST|PUT|DELETE) /[a-z/_{}]+' repo_map.yaml | awk '{print $2}' | sed 's|/{[^}]*}||g' | sed 's|^/||' | cut -d/ -f1 | sort -u); do
+    # ハンドラファイル内でルートパスが登録されているか確認
+    if grep -rlq "\"/${route_path}" backend/handlers/*.go 2>/dev/null; then
+      pass "/$route_path ルートに対応するハンドラが存在します"
+    else
+      warn "/$route_path ルートに対応するハンドラが見つかりません"
+    fi
+  done
+
+  # repo_map の domain.entities に記載されたエンティティがモデルに存在するか
+  if [ -f "backend/models/models.go" ]; then
+    for entity in $(grep -E '^\s+\w+:$' repo_map.yaml | sed -n '/entities:/,/flow:/p' | grep -oE '^\s+[A-Z]\w+' | tr -d ' '); do
+      if grep -q "type ${entity} struct" backend/models/models.go; then
+        pass "エンティティ ${entity} がモデルに存在します"
+      else
+        fail "repo_map に記載のエンティティ ${entity} がモデルに存在しません"
+      fi
+    done
   fi
-
-  # handlers/ に記載されたファイルが実在するか
-  for f in $(grep -oE 'handlers/[a-z_]+\.go' repo_map.yaml 2>/dev/null || true); do
-    if [ -f "backend/$f" ]; then
-      pass "$f が実在します"
-    else
-      fail "repo_map に記載の $f が存在しません"
-    fi
-  done
-
-  # 実際の handlers/ にあるが repo_map に記載されていないファイル
-  for f in backend/handlers/*.go; do
-    base=$(basename "$f")
-    if ! grep -q "$base" repo_map.yaml 2>/dev/null; then
-      warn "$(echo "$f" | sed 's|backend/||') が repo_map.yaml に記載されていません"
-    fi
-  done
-
-  # repositories/ も同様にチェック
-  for f in backend/repositories/*.go; do
-    base=$(basename "$f")
-    if ! grep -q "$base" repo_map.yaml 2>/dev/null; then
-      warn "$(echo "$f" | sed 's|backend/||') が repo_map.yaml に記載されていません"
-    fi
-  done
 fi
 echo ""
 
@@ -197,6 +199,173 @@ if [ -f "frontend/package.json" ]; then
   fi
 else
   fail "frontend/package.json が存在しません"
+fi
+echo ""
+
+# ---------- 6. テスト整合性 ----------
+
+echo "=== 6. テスト整合性 ==="
+
+# Backend: 各 .go ファイルに対応する _test.go が存在するか
+for dir in backend/handlers backend/repositories backend/services; do
+  if [ -d "$dir" ]; then
+    for src in "$dir"/*.go; do
+      [ -f "$src" ] || continue
+      base=$(basename "$src")
+      case "$base" in
+        *_test.go|interfaces.go) continue ;;
+      esac
+      test_file="${dir}/${base%.go}_test.go"
+      if [ -f "$test_file" ]; then
+        pass "Backend: ${base} にテストがあります"
+      else
+        warn "Backend: ${base} にテストがありません (${test_file})"
+      fi
+    done
+  fi
+done
+
+# Frontend: hooks/ api/ のファイルにテストがあるか
+for dir in frontend/src/hooks frontend/src/api; do
+  if [ -d "$dir" ]; then
+    for src in "$dir"/*.ts "$dir"/*.tsx; do
+      [ -f "$src" ] || continue
+      base=$(basename "$src")
+      case "$base" in
+        *.test.*|*.spec.*|*.d.ts) continue ;;
+      esac
+      ext="${base##*.}"
+      name="${base%.*}"
+      test_file="${dir}/${name}.test.${ext}"
+      if [ -f "$test_file" ]; then
+        pass "Frontend: ${base} にテストがあります"
+      else
+        warn "Frontend: ${base} にテストがありません (${test_file})"
+      fi
+    done
+  fi
+done
+echo ""
+
+# ---------- 7. Migration 整合性 ----------
+
+echo "=== 7. Migration 整合性 ==="
+
+MIGRATION_DIR="backend/migrations"
+if [ -d "$MIGRATION_DIR" ]; then
+  pass "migrations ディレクトリが存在します"
+
+  # up/down ペアチェック
+  for up_file in "$MIGRATION_DIR"/*.up.sql; do
+    [ -f "$up_file" ] || continue
+    down_file="${up_file%.up.sql}.down.sql"
+    base=$(basename "$up_file")
+    if [ -f "$down_file" ]; then
+      pass "${base} に対応する down ファイルがあります"
+    else
+      fail "${base} に対応する down ファイルがありません"
+    fi
+  done
+
+  # 連番チェック
+  PREV_NUM=0
+  for f in "$MIGRATION_DIR"/*.up.sql; do
+    [ -f "$f" ] || continue
+    num=$(basename "$f" | grep -oE '^[0-9]+')
+    if [ -n "$num" ]; then
+      EXPECTED=$((PREV_NUM + 1))
+      ACTUAL=$((10#$num))
+      if [ "$ACTUAL" -eq "$EXPECTED" ]; then
+        pass "Migration #${num} の連番が正しいです"
+      else
+        warn "Migration #${num} の連番が不連続です（期待: $(printf '%06d' $EXPECTED)）"
+      fi
+      PREV_NUM=$ACTUAL
+    fi
+  done
+else
+  warn "migrations ディレクトリが存在しません"
+fi
+echo ""
+
+# ---------- 8. CI/CD 整合性 ----------
+
+echo "=== 8. CI/CD 整合性 ==="
+
+CI_FILE=".github/workflows/ci.yml"
+if [ -f "$CI_FILE" ]; then
+  pass "CI 設定ファイルが存在します"
+
+  # CI が make コマンド経由かチェック
+  if grep -E '^\s+run:\s*(go |npm |npx |docker compose )' "$CI_FILE" > /dev/null 2>&1; then
+    warn "CI に Make 経由でないコマンドがあります"
+  else
+    pass "CI はすべて Make 経由で実行しています"
+  fi
+
+  # 必須ステップの存在チェック
+  for target in fmt-check fmt-check-frontend lint lint-frontend typecheck test test-frontend e2e security-check; do
+    if grep -q "make $target" "$CI_FILE"; then
+      pass "CI に make $target が含まれています"
+    else
+      warn "CI に make $target が含まれていません"
+    fi
+  done
+else
+  warn "CI 設定ファイルが存在しません ($CI_FILE)"
+fi
+echo ""
+
+# ---------- 9. Lint/Formatter 設定 ----------
+
+echo "=== 9. Lint/Formatter 設定 ==="
+
+# Frontend: ESLint
+ESLINT_FOUND=$(find frontend -maxdepth 1 -name 'eslint.config.*' -o -name '.eslintrc*' 2>/dev/null | head -1)
+if [ -n "$ESLINT_FOUND" ]; then
+  pass "Frontend: ESLint 設定ファイルが存在します ($(basename "$ESLINT_FOUND"))"
+else
+  warn "Frontend: ESLint 設定ファイルが見つかりません"
+fi
+
+# Frontend: Prettier
+PRETTIER_FOUND=$(find frontend -maxdepth 1 -name '.prettierrc*' -o -name 'prettier.config.*' 2>/dev/null | head -1)
+if [ -n "$PRETTIER_FOUND" ]; then
+  pass "Frontend: Prettier 設定ファイルが存在します ($(basename "$PRETTIER_FOUND"))"
+else
+  warn "Frontend: Prettier 設定ファイルが見つかりません"
+fi
+
+# Backend: go vet/gofmt は組み込みなので設定ファイル不要
+pass "Backend: go vet / gofmt は組み込みツール（設定ファイル不要）"
+echo ""
+
+# ---------- 10. スキル一覧整合性 ----------
+
+echo "=== 10. スキル一覧整合性 ==="
+
+if [ -f "CLAUDE.md" ] && [ -d ".claude/skills" ]; then
+  # .claude/skills/ 内のスキルが CLAUDE.md に記載されているか
+  for skill_dir in .claude/skills/*/; do
+    [ -d "$skill_dir" ] || continue
+    skill_name=$(basename "$skill_dir")
+    if grep -q "\`$skill_name\`" CLAUDE.md; then
+      pass "スキル $skill_name が CLAUDE.md に記載されています"
+    else
+      warn "スキル $skill_name が CLAUDE.md に記載されていません"
+    fi
+  done
+
+  # CLAUDE.md に記載されているがディレクトリがないスキル
+  for skill_name in $(grep -oP '`([a-z][-a-z]+)`' CLAUDE.md | tr -d '\`' | sort -u); do
+    if echo "$skill_name" | grep -q '-'; then
+      if [ ! -d ".claude/skills/$skill_name" ]; then
+        warn "CLAUDE.md 記載のスキル $skill_name のディレクトリが存在しません"
+      fi
+    fi
+  done
+else
+  warn "CLAUDE.md または .claude/skills/ が存在しません"
 fi
 echo ""
 
