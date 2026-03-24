@@ -19,4 +19,4 @@
 - `Home.tsx` の `getTagTotalsWithDiff` に `?? []` フォールバックあり（Backendも `[]` を返すようになったが防御コードとして残存）
 
 ## repo_map.yaml
-- コード変更後に `repo_map.yaml` の記述が古くなりやすい。リファクタリング時には必ず整合性を確認すること
+- `repo_map.yaml` は構造情報のみ保持（詳細版は `repo_map_full.yaml`）。リファクタリング時にはレイヤー構成・APIルート・ドメイン定義が実コードと一致しているか確認すること

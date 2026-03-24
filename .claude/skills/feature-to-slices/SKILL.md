@@ -39,8 +39,8 @@ Featureは大きすぎてそのまま実装すると危険。
 ### 2. repo_map.yaml の確認
 
 プロジェクトルートに `repo_map.yaml` がある場合は読み込み、以下を把握する：
-- ディレクトリ構成
-- 既存モジュール（`backend.layers`、`frontend.pages` 等）
+- レイヤー構成（`backend.structure`）
+- ルーティングと画面遷移（`frontend.routing`、`frontend.flow`）
 - ドメインモデル（`domain.entities`）
 
 ### 3. Slice への分解

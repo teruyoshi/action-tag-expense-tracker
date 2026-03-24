@@ -24,9 +24,9 @@ description: >
 
 プロジェクトルートの `repo_map.yaml` を最初に読む。
 特に以下のセクションを確認：
-- `backend.layers`: handler / repository / models の構成（デフォルト構造は handler → repository。services は存在しない場合がある）
-- `frontend.pages` / `frontend.components`: ページとコンポーネントの構成
-- `infrastructure`: Docker Compose / CI / Makefile の構成
+- `backend.structure`: handler / repository / services の役割と制約（デフォルト構造は handler → repository。services は BalanceService のみ）
+- `frontend.routing` / `frontend.flow`: ルーティングと画面遷移
+- `infrastructure`: Docker / CI の構成
 
 ### 2. タスクの分類
 
@@ -82,7 +82,7 @@ description: >
 - `Grep`: コード内容検索
 - `Read`: ファイル読み込み
 
-`repo_map.yaml` の `backend.layers` や `frontend.pages` セクションに該当するタスクがあれば、そこに記載されたパスから探索を開始する。
+`repo_map.yaml` の `backend.structure` や `frontend.routing` セクションに該当するタスクがあれば、そこから探索を開始する。
 
 ## 注意
 

@@ -1,355 +1,120 @@
-# repo_map.yaml - AI用コードベース地図
-# 最終更新: 2026-03-22
-
 project:
   name: action-tag-expense-tracker
-  description: 支出理由ベースの家計簿Webアプリ。行動（例：通勤、外食）にタグを付け、そのタグに紐づく支出を記録・集計する。
-  architecture: モノレポ（Backend Go + Frontend React/TypeScript）
-  database: MySQL 8.0
-  container: Docker Compose（db + backend + frontend + e2e）
+  architecture: monorepo (Go + React)
+  database: MySQL
 
-# ──────────────────────────────────────
-# ドメインモデル
-# ──────────────────────────────────────
 domain:
   entities:
     ActionTag:
-      description: 支出理由（例：通勤、外食、買い物）
       fields: [id, name]
-      file: backend/models/models.go
 
     Event:
-      description: ある日付に行った行動の記録。ActionTagと1対1で紐づく
       fields: [id, date, action_tag_id]
       relations:
-        - belongs_to: ActionTag (action_tag_id)
-        - has_many: Expense (event_id)
-      file: backend/models/models.go
+        - belongs_to: ActionTag
+        - has_many: Expense
 
     Expense:
-      description: 支出明細。Eventに紐づく個々の支出行
       fields: [id, event_id, item, amount]
-      notes: item は空文字可（金額のみの登録が可能）
-      file: backend/models/models.go
 
     Balance:
-      description: 所持金。アプリ全体で1レコードのみ
-      fields: [id, amount, updated_at]
-      file: backend/models/models.go
+      fields: [id, amount]
 
-  flow: "ActionTag → Event（日付+タグ） → Expense（項目+金額）"
+  flow: ActionTag → Event → Expense
 
-# ──────────────────────────────────────
-# Backend
-# ──────────────────────────────────────
 backend:
-  language: Go 1.24
-  framework: chi (router) + GORM (ORM)
-  entry_point: backend/cmd/server/main.go
-  port: 8080
+  language: Go
+  framework: chi + GORM
 
-  layers:
+  structure:
     handlers:
-      description: HTTPハンドラ層。リクエスト解析・バリデーション・レスポンス生成
-      files:
-        - backend/handlers/action_tag.go   # ActionTagHandler: List, Create, Update, Delete
-        - backend/handlers/event.go        # EventHandler: Create
-        - backend/handlers/expense.go      # ExpenseHandler: Create, Update
-        - backend/handlers/summary.go      # SummaryHandler: MonthTotal, TagMonthTotals, TagMonthTotalsWithDiff, TagExpenseDetails
-        - backend/handlers/balance.go      # BalanceHandler: Get, Update（Update時に減額分の支出を自動作成）
-        - backend/handlers/helpers.go          # writeJSON, writeError, parseDate, parseYearMonth
-        - backend/handlers/mocks_test.go       # テスト用モックリポジトリ
-        - backend/handlers/helpers_test.go     # TestWriteJSON, TestWriteError, TestParseDate, TestParseYearMonth
-        - backend/handlers/action_tag_test.go  # TestActionTagHandler (List, Create, Update, Delete)
-        - backend/handlers/event_test.go       # TestEventHandler (Create)
-        - backend/handlers/expense_test.go     # TestExpenseHandler (Create, Update)
-        - backend/handlers/summary_test.go     # TestSummaryHandler (MonthTotal, TagMonthTotals, TagMonthTotalsWithDiff, TagExpenseDetails)
-        - backend/handlers/balance_test.go     # TestBalanceHandler (Get, Update)
+      responsibility: HTTP handling (validation + response)
+      examples:
+        - action_tag.go (CRUD)
+        - expense.go (Create, Update)
+        - summary.go (aggregation)
+        - balance.go (state update)
 
     repositories:
-      description: DBアクセス層。GORMによるCRUD操作
-      files:
-        - backend/repositories/interfaces.go  # ActionTagRepo, EventRepo, ExpenseRepo, SummaryRepo(TagMonthTotalsWithDiff含む), BalanceRepo インターフェース定義
-        - backend/repositories/action_tag.go  # FindAll, Create, Update, Delete, FindByID, FindOrCreateByName
-        - backend/repositories/event.go       # Create
-        - backend/repositories/expense.go     # Create, Update
-        - backend/repositories/summary.go     # MonthTotal, TagMonthTotals, TagMonthTotalsWithDiff, TagExpenseDetails (生SQL) + TagSummary, TagSummaryWithDiff, TagExpenseDetail型
-        - backend/repositories/balance.go     # Get, Update, Subtract
-        - backend/repositories/testhelper_test.go  # go-sqlmock によるテスト用DB初期化ヘルパー
-        - backend/repositories/action_tag_test.go  # ActionTagRepository の単体テスト
-        - backend/repositories/event_test.go       # EventRepository の単体テスト
-        - backend/repositories/expense_test.go     # ExpenseRepository の単体テスト
-        - backend/repositories/summary_test.go     # SummaryRepository の単体テスト（TagMonthTotalsWithDiff含む）
-        - backend/repositories/balance_test.go     # BalanceRepository の単体テスト
+      responsibility: DB access (GORM + raw SQL)
+      notes:
+        - summary uses raw SQL for aggregation
 
     services:
-      description: ビジネスロジック層。複数リポジトリを組み合わせた処理
-      files:
-        - backend/services/balance.go       # BalanceService: Update（残高更新＋減額時の支出自動作成）
-        - backend/services/balance_test.go  # BalanceService の単体テスト
-
-    models:
-      description: GORMモデル定義
-      files:
-        - backend/models/models.go  # ActionTag, Event, Expense, Balance
+      responsibility: business logic
+      notes:
+        - only BalanceService exists
+        - handles balance update + auto expense creation
 
   api_routes:
-    - method: GET     path: /tags              handler: ActionTagHandler.List
-    - method: POST    path: /tags              handler: ActionTagHandler.Create
-    - method: PUT     path: /tags/{id}         handler: ActionTagHandler.Update
-    - method: DELETE  path: /tags/{id}         handler: ActionTagHandler.Delete
-    - method: POST    path: /events            handler: EventHandler.Create
-    - method: POST    path: /expenses          handler: ExpenseHandler.Create
-    - method: PUT     path: /expenses/{id}     handler: ExpenseHandler.Update
-    - method: GET     path: /summary/month     handler: SummaryHandler.MonthTotal     query: [year, month]
-    - method: GET     path: /summary/tag       handler: SummaryHandler.TagMonthTotals query: [year, month]
-    - method: GET     path: /summary/tag/diff   handler: SummaryHandler.TagMonthTotalsWithDiff query: [year, month]
-    - method: GET     path: /summary/tag/details handler: SummaryHandler.TagExpenseDetails query: [year, month, tag_id]
-    - method: GET     path: /balance           handler: BalanceHandler.Get
-    - method: PUT     path: /balance           handler: BalanceHandler.Update
+    - GET /tags
+    - POST /tags
+    - PUT /tags/{id}
+    - DELETE /tags/{id}
+    - POST /events
+    - POST /expenses
+    - PUT /expenses/{id}
+    - GET /summary/month
+    - GET /summary/tag
+    - GET /summary/tag/diff
+    - GET /summary/tag/details
+    - GET /balance
+    - PUT /balance
 
-  notes:
-    - services層はBalanceServiceのみ存在。他のhandlerはrepository直接呼び出し
-    - repositoryインターフェースが定義済み（interfaces.go）
-    - Backend単体テストあり（全handler + helpers + 全repository + BalanceService）。handler層はモックリポジトリ、repository層はgo-sqlmockによるテスト
-
-# ──────────────────────────────────────
-# Frontend
-# ──────────────────────────────────────
 frontend:
-  language: TypeScript
-  framework: React 19 + Vite 8
-  entry_point: frontend/src/main.tsx
-  dev_port: 5173
+  framework: React
 
   routing:
-    type: react-router-dom v7（BrowserRouter + Routes/Route）
-    file: frontend/src/App.tsx
-    routes:
-      - path: /                      page: Home
-      - path: /tags/select           page: TagSelect
-      - path: /expense/new           page: ExpenseInput (state: tag)
-      - path: /tags/manage           page: TagManage
-      - path: /tags/:tagId/details   page: TagDetails (query: year, month, name)
+    - /
+    - /tags/select
+    - /expense/new
+    - /tags/manage
+    - /tags/:tagId/details
 
-  pages:
-    Home:
-      file: frontend/src/pages/Home.tsx
-      description: トップページ。月別支出合計・タグ別集計・所持金を表示。月ナビゲーション付き
-      hooks: [useBalance]
-      api_calls: [getMonthTotal, getTagTotalsWithDiff]
-      navigates_to: [tag-select, tag-manage, tag-details]
+  flow:
+    - TagSelect → ExpenseInput
+    - Home → TagDetails
 
-    TagSelect:
-      file: frontend/src/pages/TagSelect.tsx
-      description: 支出入力前にタグを選択する画面。新規タグの作成も可能
-      hooks: [useTags]
-      navigates_to: [expense-input]
+  state_management:
+    hooks:
+      - useBalance
+      - useTags
+      - useExpenses
 
-    ExpenseInput:
-      file: frontend/src/pages/ExpenseInput.tsx
-      description: 支出入力画面。日付・タグ（選択済み）と複数の支出行（項目+金額）を入力して保存
-      hooks: [useExpenses]
-      notes: 保存時にまずEventを作成し、各行のExpenseを順次作成する
-
-    TagManage:
-      file: frontend/src/pages/TagManage.tsx
-      description: タグのCRUD管理画面
-      hooks: [useTags]
-
-    TagDetails:
-      file: frontend/src/pages/TagDetails.tsx
-      description: タグ別の支出明細画面。指定月のタグに紐づく支出一覧と合計を表示
-      hooks: [useExpenses]
-      api_calls: [getTagExpenseDetails]
-
-  api_client:
-    file: frontend/src/api/client.ts
-    description: fetch ベースのAPIクライアント。型定義（ActionTag, Event, Expense, TagSummary, TagSummaryWithDiff, TagExpenseDetail, Balance）も含む
-    base_url: 相対パス（Viteプロキシ経由でbackendに転送）
-
-  assets:
-    description: 静的アセット（画像・SVG）
-    directory: frontend/src/assets/
-    files:
-      - frontend/src/assets/vite.svg
-      - frontend/src/assets/hero.png
-
-  styles:
-    file: frontend/src/index.css
-
-  testing:
-    framework: Vitest + @testing-library/react
-    setup: frontend/src/test/setup.ts
-    config: frontend/vitest.config.ts
-    test_files:
-      - frontend/src/api/client.test.ts       # APIクライアントの単体テスト
-      - frontend/src/pages/Home.test.tsx       # Homeページのコンポーネントテスト
-      - frontend/src/pages/TagSelect.test.tsx  # TagSelectページのコンポーネントテスト
-      - frontend/src/pages/ExpenseInput.test.tsx # ExpenseInputページのコンポーネントテスト
-      - frontend/src/pages/TagManage.test.tsx  # TagManageページのコンポーネントテスト
-      - frontend/src/pages/TagDetails.test.tsx # TagDetailsページのコンポーネントテスト
-
-  components:
-    description: 再利用可能なUIコンポーネント（Homeページから分離）
-    files:
-      - frontend/src/components/BalanceCard.tsx      # 所持金表示・設定モーダル
-      - frontend/src/components/BalanceCard.test.tsx  # BalanceCardのテスト
-      - frontend/src/components/MonthNav.tsx          # 月ナビゲーション（前月・次月）
-      - frontend/src/components/MonthNav.test.tsx     # MonthNavのテスト
-      - frontend/src/components/TagSummaryCard.tsx    # 支出理由別サマリー表示
-      - frontend/src/components/TagSummaryCard.test.tsx # TagSummaryCardのテスト
-
-  hooks:
-    description: カスタムhooks（API呼び出しのロジック分離）
-    files:
-      - frontend/src/hooks/useBalance.ts    # 所持金の取得・更新
-      - frontend/src/hooks/useTags.ts       # タグのCRUD操作
-      - frontend/src/hooks/useExpenses.ts   # 支出の作成・更新
-
-  notes:
-    - utils/ はまだ存在しない
-
-# ──────────────────────────────────────
-# E2Eテスト
-# ──────────────────────────────────────
-e2e:
-  framework: Playwright
-  config: e2e/playwright.config.ts
-  base_url: http://frontend:5173  # Docker Compose内のサービス名
-  test_files:
-    - e2e/tests/home.spec.ts           # トップページの表示・画面遷移テスト
-    - e2e/tests/expense-flow.spec.ts   # タグ作成→支出入力→保存フローテスト
-    - e2e/tests/balance.spec.ts        # 所持金更新フローテスト
-
-# ──────────────────────────────────────
-# インフラ
-# ──────────────────────────────────────
-infrastructure:
-  docker_compose:
-    file: docker-compose.yml
-    services:
-      db:
-        image: mysql:8.0
-        port: 3306
-        database: expense_tracker
-        healthcheck: mysqladmin ping -h 127.0.0.1（TCP接続で初期化完了を確認）
-      backend:
-        build: ./backend
-        port: 8080
-        depends_on: db (healthy)
-        healthcheck: curl http://localhost:8080/balance（start_period: 60s）
-      frontend:
-        build: ./frontend
-        port: 5173
-        depends_on: backend (healthy)
-        healthcheck: wget --spider http://localhost:5173（start_period: 30s）
-      e2e:
-        build: ./e2e
-        profile: e2e
-        depends_on: frontend (healthy)
-
-  ci:
-    file: .github/workflows/ci.yml
-    description: GitHub Actions CI（push/PR時にDocker Compose起動後にfmt-check・lint・typecheck・test・e2e・security-checkを実行。main push時はsecurity-check-fullも実行）
-
-  dockerfiles:
-    - file: backend/Dockerfile
-      base: golang:1.24-alpine
-    - file: frontend/Dockerfile
-      base: node:24-alpine
-    - file: e2e/Dockerfile
-      base: mcr.microsoft.com/playwright:v1.58.2-noble
-
-  makefile:
-    file: Makefile
-    targets:
-      dev: Docker Compose起動（db + backend + frontend）
-      stop: Docker Compose停止
-      build: Docker Compose ビルド
-      clean: Docker環境の完全クリーンアップ（コンテナ・ボリューム・イメージ削除）
-      fmt: Backend gofmt
-      fmt-frontend: Frontend Prettier
-      fmt-check: Backend フォーマットチェック（変更なし）
-      fmt-check-frontend: Frontend フォーマットチェック（変更なし）
-      lint: Backend go vet
-      lint-frontend: Frontend ESLint
-      test: Backend go test
-      test-frontend: Frontend Vitest
-      typecheck: Frontend tsc --noEmit
-      e2e: Playwright テスト（Docker Compose e2e プロファイル）
-      quick-check: fmt-check + fmt-check-frontend + lint + lint-frontend + typecheck
-      check: quick-check + test + test-frontend
-      verify: check + e2e
-      test-diff: 変更ファイルの影響テストのみ実行
-      doctor: プロジェクト整合性チェック
-      ci-up: CI用サービス起動（VITE_WATCH=false docker compose up -d --wait）
-      migrate-up: DBマイグレーション適用
-      migrate-down: DBマイグレーション1つ戻す
-      migrate-create: 新規マイグレーションファイル作成
-      vuln-backend: Backend 脆弱性チェック（govulncheck）
-      vuln-frontend: Frontend 脆弱性チェック（npm audit）
-      sec-backend: Backend 静的セキュリティ解析（gosec）
-      sec-secrets: シークレット漏洩検出（gitleaks）
-      sec-fs: リポジトリ全体スキャン（trivy, HIGH/CRITICAL）
-      security-check: 日常用セキュリティチェック（vuln + sec）
-      security-check-full: フルセキュリティチェック（security-check + trivy）
-
-# ──────────────────────────────────────
-# ユースケース
-# ──────────────────────────────────────
 use_cases:
   create_expense_flow:
-    description: タグを選択して支出を登録する一連の流れ
     steps:
-      - step: タグ選択
-        frontend: TagSelect
-        action: 既存タグを選択 or 新規作成
-      - step: イベント作成
-        api: POST /events
-        description: 日付 + action_tag_id で Event を作成
-      - step: 支出作成（複数）
-        api: POST /expenses
-        description: Event に紐づく支出行を複数登録
+      - select tag
+      - create event
+      - create expenses
 
   manage_tags:
-    description: タグのCRUD操作
     operations:
-      - name: 一覧取得
-        api: GET /tags
-      - name: 作成
-        api: POST /tags
-      - name: 更新
-        api: PUT /tags/{id}
-      - name: 削除
-        api: DELETE /tags/{id}
+      - CRUD
 
-  view_month_summary:
-    description: 月ごとの支出集計を表示
-    apis:
-      - GET /summary/month
-      - GET /summary/tag
-      - GET /summary/tag/diff
-
-  view_tag_details:
-    description: タグごとの支出明細表示
-    api: GET /summary/tag/details
-    query: [year, month, tag_id]
+  view_summary:
+    endpoints:
+      - /summary/month
+      - /summary/tag
+      - /summary/tag/diff
 
   update_balance:
-    description: 所持金更新（減額時に支出が自動作成される）
-    api: PUT /balance
-    notes:
-      - 減額時は内部で Expense が自動生成される
+    note:
+      - decreasing balance triggers expense creation
 
-# ──────────────────────────────────────
-# 未実装・不足部分
-# ──────────────────────────────────────
-gaps:
-  - "services層: BalanceServiceのみ存在。他のhandlerはrepository直接呼び出し"
-  - "Backendテスト: handler層・repository層ともに全テスト済み"
-  - "E2Eテスト: Playwright設定済み。Home・支出入力フロー・Balance更新のテストあり"
-  - "OpenAPI仕様: api/openapi.yaml が存在しない"
-  - "カスタムhooks: useBalance, useTags, useExpenses の3つ"
-  - "エラーハンドリング: Frontend側のエラー表示が alert のみ"
-  - "セキュリティ: govulncheck・gosec・npm audit・gitleaks・trivy導入済み。Semgrep・OWASP ZAPは未導入"
+infrastructure:
+  docker:
+    services: [db, backend, frontend, e2e]
+
+  ci:
+    system: GitHub Actions
+    steps:
+      - lint
+      - test
+      - e2e
+      - security
+
+constraints:
+  - services layer is minimal (only BalanceService)
+  - summary aggregation is repository-driven (not service)
+  - frontend error handling is minimal (alert)
