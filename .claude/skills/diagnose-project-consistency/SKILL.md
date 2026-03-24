@@ -55,7 +55,7 @@ repo_map の `frontend.routing` に記載されたルートに対応するペー
 `docker compose`、`go run`、`npm run`、`playwright test` などのコマンドが
 ドキュメントで直接実行を案内されていないか検証する。
 
-1. `CLAUDE.md`、`README.md`、`docs/` 内のドキュメントを Read で読む
+1. `CLAUDE.md`、`README.md`、`docs/`、`.claude/docs/` 内のドキュメントを Read で読む
 2. 以下のコマンドパターンを Grep で検出する：
    - `docker compose`（Makefile 外での使用）
    - `go run` / `go build`
@@ -71,7 +71,7 @@ repo_map の `frontend.routing` に記載されたルートに対応するペー
 同じ概念を表すファイルが複数存在していないかを検証する。
 AIDD では AI が似たファイルを複数生成してしまうことがよくある。
 
-1. Glob でプロジェクトルート直下および `docs/` 配下のファイルを列挙する
+1. Glob でプロジェクトルート直下および `docs/`、`.claude/docs/` 配下のファイルを列挙する
 2. 以下のキーワードグループで重複候補を検出する：
    - `map`, `structure`, `tree`, `layout`
    - `guide`, `manual`, `howto`, `instructions`
